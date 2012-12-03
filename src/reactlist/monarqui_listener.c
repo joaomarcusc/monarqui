@@ -81,15 +81,16 @@ void *run_listener(void *startarg)
 	    }
 	    action_item = action_item->next;
 	  }
+	  g_free(full_path);
 	}		
 	if(event->mask & IN_ISDIR && ((event->mask & IN_DELETE) || (event->mask & IN_MOVED_FROM)))
 	{
 	  _monwatch_delete_item(watch, entry, event->name);
-	}	
-	g_free(full_path);
+	}			
       }      
       i += EVENT_SIZE + event->len;
     }
+    usleep(500);
   }
   printf("Closing listener...\n");
   zmq_close(push_socket);

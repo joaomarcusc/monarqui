@@ -25,25 +25,24 @@ monwatch *monwatch_create()
   return watch;
 }
 
+void monwatch_entry_free_gfunc(gpointer data, gpointer user_data) 
+{
+  monwatch_entry_free((monwatch *)user_data, (monwatch_entry *)data);
+}
+
 void monwatch_entry_free(monwatch *watch, monwatch_entry *entry) 
 {   
   inotify_rm_watch(watch->inotify_fd, entry->wdescr);
   g_free(entry->file_name);
-  free(entry);
+  g_free(entry);
 }
 
 
 void monwatch_free(monwatch *watch) 
 {
-  int i;
+  int i;  
   monwatch_entry *entry;  
-  GList *item = g_list_first(watch->entrylist);
-  while(item) 
-  {
-    entry = (monwatch_entry *)item->data;
-    monwatch_entry_free(watch,entry);    
-    item = item->next;            
-  }        
+  g_list_foreach(g_list_first(watch->entrylist), monwatch_entry_free_gfunc, (gpointer)watch);
   g_list_free(watch->entrylist); 
   g_hash_table_destroy(watch->wdescr_map);  
   close(watch->inotify_fd);  

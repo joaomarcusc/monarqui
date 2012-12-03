@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkWindow" id="windowMain">
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkHButtonBox" id="hbtns">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkToggleButton" id="btnStartPause">
+                <property name="label" translatable="yes">Start</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">startPause</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnConfig">
+                <property name="label" translatable="yes">Config</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">openConfig</property>
+                <property name="image_position">top</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkToggleAction" id="startPause">
+    <signal name="toggled" handler="on_startPause_toggled"/>
+  </object>
+  <object class="GtkAction" id="openConfig">
+    <signal name="activate" handler="on_openConfig_activate"/>
+  </object>
+</interface>

@@ -3,6 +3,7 @@
 #include "monconf.h"
 #include <string.h>
 #include <fnmatch.h>
+#include <glib.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -107,7 +108,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
     action_entry->script = g_strdup(action_tmp.script);  
     monaction_init_state(action_entry);
   }
-  xmlXPathFreeObject(xobj); 
+  xmlXPathFreeObject(xobj);  
   xmlXPathFreeContext(xctx);
   xctx = xmlXPathNewContext(doc);
   if(xctx == NULL)
@@ -181,21 +182,26 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
   xmlFreeDoc(doc);
   xmlCleanupParser();
 }
-    
+
+void string_free_gfunc(gpointer data, gpointer user_data)
+{
+  free((char *)data);
+}
+
 void monconf_free(monconf *conf) 
 {
   int i;
   monconf_entry *entry;  
+  GList *item;
   int num_entries = monconf_num_entries(conf);
-  monaction_entry *action_entry;
-  g_list_foreach(conf->entrylist, monconf_free_entry, NULL);
-  GList *keys = g_hash_table_get_keys(conf->actionMap);
+  monaction_entry *action_entry;  
+  g_list_foreach(g_list_first(conf->entrylist), &monconf_free_entry_gfunc, NULL);
+  GList *keys = g_hash_table_get_keys(conf->actionMap);  
   item = g_list_first(keys);
   while(item)
   {
     action_entry = (monaction_entry *)item->data;
-    lua_close(action_entry->luaState);
-    free(action_entry);
+    monaction_free_entry(action_entry);
     item = item->next;
   }
   g_list_free(keys);
@@ -204,39 +210,44 @@ void monconf_free(monconf *conf)
   free(conf);
 } 
 
+void monaction_free_entry(monaction_entry *action)
+{
+  lua_close(action->luaState);
+  g_free(action->script);
+  g_free(action);
+}
+
+void monaction_free_entry_gfunc(gpointer data, gpointer user_data)
+{
+  monaction_free_entry((monaction_entry *)data);
+}
+void monconf_free_entry_gfunc(gpointer data, gpointer user_data)
+{
+  monconf_free_entry((monconf_entry *)data);
+}
+
+void monconf_free_action_entry(monconf_action_entry *action)
+{  
+  g_list_foreach(g_list_first(action->globs),string_free_gfunc,NULL);
+  g_list_free(action->globs);
+  g_free(action->filter_glob);     
+  g_free(action);  
+}
+
+void monconf_free_action_entry_gfunc(gpointer data, gpointer user_data) 
+{
+  monconf_free_action_entry((monconf_action_entry *) data);
+}
+
 void monconf_free_entry(monconf_entry *entry)
 {   
   monconf_action_entry *action;  
-  GList *item; GList *glob_item;
-  item = g_list_first(entry->actions);
-  while(item)
-  {
-    action = (monconf_action_entry *)item->data;
-    if(action)
-    {      
-      glob_item = g_list_first(action->globs);
-      while(glob_item)
-      {
-	g_free(glob_item->data);
-	glob_item = glob_item->next;
-      }
-      g_list_free(action->globs);
-      g_free(action->filter_glob);     
-    }    
-    item = item->next;
-  }  
+  g_list_foreach(g_list_first(entry->actions), &monconf_free_action_entry_gfunc, NULL);
+  g_list_foreach(g_list_first(entry->ignore_files), &string_free_gfunc, NULL);
   g_list_free(g_list_first(entry->actions));
-  
-  item = g_list_first(entry->ignore_files);
-  while(item)
-  {
-    g_free(entry->data);
-    item = item->next;
-  }
   g_list_free(g_list_first(entry->ignore_files));
-  
   g_free(entry->file_name);
-  free(entry);
+  g_free(entry);
 }
 
 int monconf_num_entries(monconf *conf)

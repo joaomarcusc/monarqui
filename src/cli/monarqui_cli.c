@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     else
       usleep(10000);
   }
-  stop_reactor_and_listener(zmq_context, &rthread, &rstart, rexitstatus, &lthread, &lstart, lexitstatus);
+  stop_reactor_and_listener(zmq_context, &rthread, &rstart, &rexitstatus, &lthread, &lstart, &lexitstatus);
   sigprocmask(SIG_SETMASK, &oldmask, NULL);
   printf("Exiting...\n");  
   fflush(stdout);
