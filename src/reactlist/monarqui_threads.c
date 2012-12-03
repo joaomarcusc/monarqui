@@ -21,7 +21,6 @@ void start_reactor_and_listener(void *zmq_context, pthread_t* rthread, reactstar
   int ltr, rtr;    
   monconf *conf;  
   int signum;
-  sigset_t oldmask, mask, pendingMask;
     
   zmq_context = CREATE_ZMQ_CONTEXT();
   

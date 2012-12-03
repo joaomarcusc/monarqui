@@ -16,81 +16,138 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-void on_startpause_clicked (GtkObject *object, gpointer user_data)
-{
-  pthread_t *rthread, *lthread;
-  reactstart *rstart;
-  liststart *lstart; 
+#define ICON_NAME_START "media-playback-start"
+#define ICON_NAME_STOP "gtk-stop"
+#define ICON_SYSTRAY "folder"
+
+struct s_gui_data 
+{  
+  pthread_t rthread; 
+  pthread_t lthread;
+  reactstart rstart;
+  liststart lstart;  
   void *zmq_context;
   
-  GtkWidget *window = gtk_widget_get_toplevel(GTK_WIDGET(object));
-  zmq_context = (void *)g_object_get_data(G_OBJECT(window), "zmq_context");
-  rthread = (pthread_t *)g_object_get_data(G_OBJECT(window), "rthread");
-  lthread = (pthread_t *)g_object_get_data(G_OBJECT(window), "lthread");
-  rstart = (reactstart *)g_object_get_data(G_OBJECT(window), "rstart");
-  lstart = (liststart *)g_object_get_data(G_OBJECT(window), "lstart");
-  int rstatus, lstatus;
-  void *rstop_status, *lstop_status;
-  if(lstart->active)
-  {
-    stop_reactor_and_listener(zmq_context, rthread, rstart, &rstop_status, lthread, lstart, &lstop_status);
-    gtk_button_set_label((GtkButton *)object, "Start");
-  }
-  else 
-  {
-    start_reactor_and_listener(zmq_context, rthread, rstart, &rstatus, lthread, lstart, &lstatus);
-    gtk_button_set_label((GtkButton *)object, "Stop");
-  }
-}
+  GtkWidget *windowMain;
+  GtkWidget *windowConfig;
+  
+  GtkAction *action_mainExit;
+  GtkAction *action_configOpen;
+  GtkAction *action_configClose;
+  GtkAction *action_startPause;
+  
+  GtkImage *image_startStop;
+};
 
-void on_window_destroy (GtkObject *object, gpointer user_data)
+void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 {
-  void *zmq_context = (void *)g_object_get_data(G_OBJECT(object), "zmq_context");
-  pthread_t *rthread = (pthread_t *)g_object_get_data(G_OBJECT(object), "rthread");
-  pthread_t *lthread = (pthread_t *)g_object_get_data(G_OBJECT(object), "lthread");
-  reactstart *rstart = (reactstart *)g_object_get_data(G_OBJECT(object), "rstart");
-  liststart *lstart= (liststart *)g_object_get_data(G_OBJECT(object), "lstart");
-  void *rstatus, *lstatus;
-  if(lstart->active)
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  void *rstop_status, *lstop_status;
+  if(gui_data->lstart.active)
   {
-    stop_reactor_and_listener(zmq_context, rthread, rstart, &rstatus, lthread, lstart, &lstatus);
+    stop_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
+			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);
   }
   gtk_main_quit();
 }
 
-int
-main (int argc, char *argv[])
+void on_action_configOpen_activate(GtkAction *action, gpointer user_data)
 {
-    void *zmq_context;
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_widget_show(gui_data->windowConfig);
+}
+
+void on_action_configClose_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_widget_destroy(gui_data->windowConfig);
+}
+
+void on_action_startPause_activate(GtkAction *action, gpointer user_data)
+{   
+  pthread_t *rthread, *lthread;
+  reactstart *rstart;
+  liststart *lstart; 
+  void *zmq_context;
     
-    pthread_t rthread, lthread;
-    reactstart rstart;
-    liststart lstart;
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  int rstatus, lstatus;
+  void *rstop_status, *lstop_status;  
+  if(gui_data->lstart.active)
+  {
+    stop_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
+			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
+    gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 			      
+  }
+  else 
+  {   
+    start_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstatus, 
+			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);    
+    gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 			      
+  }
+}
+
+void on_windowMain_destroy (GtkObject *object, gpointer user_data)
+{   
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_action_activate(gui_data->action_mainExit);
+}
+
+void on_windowConfig_destroy (GtkObject *object, gpointer user_data)
+{   
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_action_activate(gui_data->action_configClose);
+}
+
+void on_btnStartPause_clicked(GtkObject *object, gpointer user_data)
+{
+}
+
+
+void on_systray_clicked(GtkStatusIcon *status_icon, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  if(gtk_window_is_active((GtkWindow *)gui_data->windowMain))
+    gtk_window_iconify((GtkWindow *)gui_data->windowMain);
+  else
+    gtk_window_deiconify((GtkWindow *)gui_data->windowMain);  
+}
+
+int main (int argc, char *argv[])
+{
+  struct s_gui_data data;  
     
-    rstart.active = 0;
-    lstart.active = 0;
+  data.rstart.active = 0;
+  data.lstart.active = 0;
     
-    GtkBuilder      *builder; 
-    GtkWidget       *window;
+  GtkBuilder      *builder; 
+  GtkStatusIcon *systray_icon;
+  gtk_init (&argc, &argv);
 
-    zmq_context = CREATE_ZMQ_CONTEXT();
-    gtk_init (&argc, &argv);
-
-    builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, "ui-glade/monarqui.glade", NULL);
-    window = GTK_WIDGET (gtk_builder_get_object (builder, "windowMain"));
-
-    g_object_set_data(G_OBJECT(window), "zmq_context", (gpointer)zmq_context);
-    g_object_set_data(G_OBJECT(window), "rthread", (gpointer)&rthread);
-    g_object_set_data(G_OBJECT(window), "lthread", (gpointer)&lthread);
-    g_object_set_data(G_OBJECT(window), "rstart", (gpointer)&rstart);
-    g_object_set_data(G_OBJECT(window), "lstart", (gpointer)&lstart);
-    gtk_builder_connect_signals (builder, NULL);
-
-    g_object_unref (G_OBJECT (builder));
+  builder = gtk_builder_new ();
+  gtk_builder_add_from_file (builder, "ui-glade/monarqui_gui.glade", NULL);  
+  
+  data.windowMain = (GtkWidget *)GTK_WIDGET(gtk_builder_get_object (builder, "windowMain"));
+  data.windowConfig = (GtkWidget *)GTK_WIDGET(gtk_builder_get_object (builder, "windowConfig"));
+  data.action_mainExit = GTK_ACTION(gtk_builder_get_object(builder, "action_mainExit"));
+  data.action_configOpen = GTK_ACTION(gtk_builder_get_object(builder, "action_configOpen"));
+  data.action_configClose = GTK_ACTION(gtk_builder_get_object(builder, "action_configClose"));
+  data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));  
+  
+  data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(builder,"image_startStop"));  
     
-    gtk_widget_show (window);                
-    gtk_main ();
-
-    return 0;
+  gtk_builder_connect_signals (builder, (gpointer)&data);  
+  
+  gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
+  systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
+  gtk_status_icon_set_visible(systray_icon, TRUE);
+  g_signal_connect_object(G_OBJECT(systray_icon), "activate", G_CALLBACK(on_systray_clicked), &data, 0);
+  g_signal_connect_object(G_OBJECT(systray_icon), "clicked", G_CALLBACK(on_systray_clicked), &data, 0);
+    
+  g_object_unref (G_OBJECT (builder));
+    
+  gtk_widget_show (data.windowMain);                
+  gtk_main ();
+  
+  return 0;
 }
