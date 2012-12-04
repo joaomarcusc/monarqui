@@ -51,7 +51,7 @@ void *run_reactor(void *startarg)
 	    show_lua_error(L, "lua_pcall() failed");     
         int retval = lua_toboolean(L,-1);
 	lua_pop(L, 1);      
-	if(!retval)
+	if(retval)
 	{
 	  printf("Execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
 	}

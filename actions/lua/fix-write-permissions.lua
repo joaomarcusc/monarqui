@@ -26,10 +26,12 @@ function walk_tree(dir)
 end
 
 function initialize (state)
+  return true
 end
 
 function conf_action_preload(dir) 
   os.execute("chmod -R u+w "..dir)
+  return true
 end
 
 function event_action(event, base_path, file_path, timestamp) 
@@ -38,4 +40,5 @@ function event_action(event, base_path, file_path, timestamp)
   if file_stat ~= nil and string.sub(file_stat.mode,2,2) ~= "w" then
     posix.chmod(full_path,"u+w")
   end
+  return true
 end

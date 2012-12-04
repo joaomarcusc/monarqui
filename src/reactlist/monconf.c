@@ -211,8 +211,9 @@ void monconf_free(monconf *conf)
 } 
 
 void monaction_free_entry(monaction_entry *action)
-{
-  lua_close(action->luaState);
+{  
+  if(action->luaState)
+    lua_close(action->luaState);
   g_free(action->script);
   g_free(action);
 }
@@ -385,7 +386,7 @@ void monconf_execute_preload_actions(monconf *conf)
     L = action_ptr->luaState;
     lua_getglobal(L, "initialize");    
     lua_pushnil(L);
-    if (lua_pcall(L, 1, 0, 0))         
+    if (lua_pcall(L, 1, 1, 0))         
 	bail(L, "lua_pcall() failed");     
     lua_pop(L, 1);
     action_item = action_item->next;
@@ -403,7 +404,7 @@ void monconf_execute_preload_actions(monconf *conf)
       L = action_ptr->luaState;
       lua_getglobal(L, "conf_action_preload");
       lua_pushstring(L,(char *)entry_ptr->file_name);
-      if (lua_pcall(L, 1, 0, 0))         
+      if (lua_pcall(L, 1, 1, 0))         
 	  bail(L, "lua_pcall() failed");           
       lua_pop(L, 1);
       action_entry_item = action_entry_item->next;

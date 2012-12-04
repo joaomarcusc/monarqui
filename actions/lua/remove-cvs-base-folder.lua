@@ -10,6 +10,7 @@ function deltree(dir)
     end
   end
   os.remove(dir)
+  return true
 end
 
 function walk_tree(dir)
@@ -37,6 +38,7 @@ function walk_tree(dir)
 end
 
 function initialize (state)
+  return true
 end
 
 function conf_action_preload(dir) 
@@ -45,6 +47,7 @@ function conf_action_preload(dir)
       deltree(filename)
     end
   end  
+  return true
 end
 
 function event_action(event, base_path, file_path, timestamp) 
@@ -59,4 +62,5 @@ function event_action(event, base_path, file_path, timestamp)
       deltree(full_path)
     end
   end
+  return true
 end
