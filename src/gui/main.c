@@ -37,6 +37,11 @@ struct s_gui_data
   GtkAction *action_startPause;
   
   GtkImage *image_startStop;
+  
+  GtkListStore *listStoreActions;
+  GtkListStore *listStoreEntries;
+  
+  GtkTreeView *treeviewEntries;
 };
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
@@ -63,6 +68,51 @@ void on_action_configClose_activate(GtkAction *action, gpointer user_data)
   gtk_widget_destroy(gui_data->windowConfig);
 }
 
+void on_reactlist_start(struct s_gui_data *gui_data) 
+{
+  enum
+  {
+    COL_ENTRY_PATH = 0,
+    COL_ENTRY_RECURSIVE,
+    COL_ENTRY_EVENTS,
+    COL_ENTRY_IGNORE
+  };
+  GtkTreeModel *modelEntries;
+  GtkTreeIter iter;
+
+  gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
+
+  modelEntries = gtk_tree_view_get_model(GTK_TREE_VIEW(gui_data->treeviewEntries));
+  g_object_ref(modelEntries); 
+  gtk_tree_view_set_model(GTK_TREE_VIEW(gui_data->treeviewEntries), NULL); /* Detach model from view */
+
+  gtk_list_store_clear(gui_data->listStoreEntries);
+  GList *item = g_list_first(gui_data->lstart.conf->entrylist);
+  while(item)
+  {
+    monconf_entry *entry = (monconf_entry *)item->data;
+    gtk_list_store_append(gui_data->listStoreEntries, &iter);
+    gtk_list_store_set(gui_data->listStoreEntries,&iter,
+		       COL_ENTRY_PATH, entry->file_name,
+		       COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
+		       COL_ENTRY_EVENTS, g_strdup_printf("%d",entry->events),
+		       
+		       -1
+		      );
+  
+    item = item->next;
+  }
+  gtk_tree_view_set_model(GTK_TREE_VIEW(gui_data->treeviewEntries), modelEntries); /* Re-attach model to view */
+
+  g_object_unref(modelEntries);  
+}
+
+void on_reactlist_stop(struct s_gui_data *gui_data) 
+{
+  gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 
+  
+}
+
 void on_action_startPause_activate(GtkAction *action, gpointer user_data)
 {   
   pthread_t *rthread, *lthread;
@@ -77,13 +127,14 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   {
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
-    gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 			      
+  
+    on_reactlist_stop(gui_data);
   }
   else 
   {   
     start_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
-			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);    
-    gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 			      
+			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
+    on_reactlist_start(gui_data);
   }
 }
 
@@ -133,17 +184,18 @@ int main (int argc, char *argv[])
   data.action_configOpen = GTK_ACTION(gtk_builder_get_object(builder, "action_configOpen"));
   data.action_configClose = GTK_ACTION(gtk_builder_get_object(builder, "action_configClose"));
   data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));  
-  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(builder,"image_startStop"));  
-    
+
+  data.treeviewEntries = (GtkTreeView *) GTK_TREE_VIEW(gtk_builder_get_object(builder,"treeviewEntries"));
+  data.listStoreActions = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreActions"));  
+  data.listStoreEntries = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreEntries"));  
+  
   gtk_builder_connect_signals (builder, (gpointer)&data);  
   
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
   systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
   gtk_status_icon_set_visible(systray_icon, TRUE);
-  g_signal_connect_object(G_OBJECT(systray_icon), "activate", G_CALLBACK(on_systray_clicked), &data, 0);
-  g_signal_connect_object(G_OBJECT(systray_icon), "clicked", G_CALLBACK(on_systray_clicked), &data, 0);
-    
+ 
   g_object_unref (G_OBJECT (builder));
     
   gtk_widget_show (data.windowMain);                
