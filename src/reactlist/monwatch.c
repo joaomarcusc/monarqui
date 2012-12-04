@@ -187,3 +187,51 @@ void _monwatch_delete_item(monwatch *watch, monwatch_entry *entry, char *dir_pat
   }
   g_free(full_path);    
 }
+
+void monevent_serialize(monevent *event, char **buffer, int *buffer_size)
+{    
+  FILE *out = open_memstream(buffer, buffer_size);
+  size_t len;
+  len = strlen(event->base_path);
+  fwrite(&len, sizeof(size_t), 1, out);
+  fwrite(event->base_path, sizeof(char), len, out);
+  len = strlen(event->file_path);
+  fwrite(&len, sizeof(size_t), 1, out);
+  fwrite(event->file_path, sizeof(char), len, out);
+  len = strlen(event->action_name);
+  fwrite(&len, sizeof(size_t), 1, out);
+  fwrite(event->action_name, sizeof(char), len, out);
+  fwrite(&(event->event), sizeof(int), 1, out);
+  fwrite(&(event->is_dir), sizeof(int), 1, out);
+  fwrite(&(event->timestamp), sizeof(int), 1, out);  
+  fflush(out);
+  fclose(out);
+  
+}
+void monevent_deserialize(char *buffer, int buffer_size, monevent *event)
+{
+  FILE *in = fmemopen(buffer, buffer_size, "rb");  
+  size_t len;
+  fread(&len, sizeof(size_t), 1, in);  
+  len++;
+  event->base_path= (char *)calloc(sizeof(char),len);  
+  fread(event->base_path, sizeof(char), len-1, in);
+  event->base_path[len] = 0;
+
+  fread(&len, sizeof(size_t), 1, in);
+  len++;
+  event->file_path= (char *)calloc(sizeof(char),len);
+  fread(event->file_path, sizeof(char), len-1, in);
+  event->file_path[len] = 0;
+  
+  fread(&len, sizeof(size_t), 1, in);
+  len++;
+  event->action_name= (char *)calloc(sizeof(char),len);
+  fread(event->action_name, sizeof(char), len-1, in);  
+  event->action_name[len] = 0;
+  
+  fread(&(event->event), sizeof(int), 1, in);
+  fread(&(event->is_dir), sizeof(int), 1, in);
+  fread(&(event->timestamp), sizeof(int), 1, in);
+  fclose(in);
+}

@@ -32,7 +32,6 @@ int main(int argc, char **argv)
   int rinitstatus, linitstatus;
   void *rexitstatus, *lexitstatus;
   int ltr, rtr;    
-  void *zmq_context;
   monconf *conf;  
   int signum;
   sigset_t oldmask, mask, pendingMask;
@@ -44,7 +43,7 @@ int main(int argc, char **argv)
   sigaddset(&mask,SIGQUIT);
   sigprocmask(SIG_BLOCK, &mask, &oldmask);
     
-  start_reactor_and_listener(zmq_context, &rthread, &rstart, &rinitstatus, &lthread, &lstart, &linitstatus);
+  start_reactor_and_listener(&rthread, &rstart, &rinitstatus, &lthread, &lstart, &linitstatus);
   while(1) 
   {
     sigpending(&pendingMask);
@@ -56,7 +55,7 @@ int main(int argc, char **argv)
     else
       usleep(10000);
   }
-  stop_reactor_and_listener(zmq_context, &rthread, &rstart, &rexitstatus, &lthread, &lstart, &lexitstatus);
+  stop_reactor_and_listener(&rthread, &rstart, &rexitstatus, &lthread, &lstart, &lexitstatus);
   sigprocmask(SIG_SETMASK, &oldmask, NULL);
   printf("Exiting...\n");  
   fflush(stdout);

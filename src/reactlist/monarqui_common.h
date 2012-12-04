@@ -1,7 +1,6 @@
 #ifndef _MONARQUI_COMMON_H
 #define _MONARQUI_COMMON_H
 
-#define ZMQ_QUEUE_NAME "inproc://file_events"
 #define STR_ATTRIB "attrib"
 #define STR_MODIFY "modify"
 #define STR_DELETE "delete"
@@ -30,18 +29,8 @@
 #include <zmq.h>
 #include <lua.h>
 
-#if ZMQ_VERSION_MAJOR > 2
-  #define CREATE_ZMQ_CONTEXT() zmq_ctx_new()
-  #define DESTROY_ZMQ_CONTEXT(ctx) zmq_ctx_destroy(ctx)
-  #define SEND_ZMQ_MESSAGE(msg, socket, flags) zmq_msg_send(msg, socket, flags)
-  #define RECV_ZMQ_MESSAGE(msg, socket, flags) zmq_msg_recv(msg, socket, flags)
-#else
-  #define CREATE_ZMQ_CONTEXT() zmq_init(0)
-  #define DESTROY_ZMQ_CONTEXT(ctx) zmq_close(ctx)
-  #define SEND_ZMQ_MESSAGE(msg, socket, flags) zmq_send(socket, msg, flags)
-  #define RECV_ZMQ_MESSAGE(msg, socket, flags) zmq_recv(socket, msg, flags)
-#endif
 int str_events_to_int(char *str);
 void bail(lua_State *L, char *msg);
 void show_lua_error(lua_State *L, char *msg);
+int receive_zmq_message(void *socket, void *buffer, int *msgsize);
 #endif

@@ -13,27 +13,31 @@ void *run_reactor(void *startarg)
 {  
   lua_State *L;
   monaction_entry *action_entry;
-  void *pull_socket;
+  void *sub_socket;
   zmq_msg_t message;  
   int msgsize;
   int recvreply;  
   reactstart *start;  
-  char msgcontent[2048];
   monevent evt;
-  // TODO: message buffer size shouldn't be fixed
   start = (reactstart *)startarg;
   printf("Waiting for events to react...\n");
     
-  pull_socket = zmq_socket(start->zmq_context, ZMQ_PULL);
-  zmq_bind(pull_socket, ZMQ_QUEUE_NAME);
-  start->socket_opened = 1;
+  sub_socket = zmq_socket(start->zmq_context, ZMQ_SUB);    
+  if(zmq_connect(sub_socket, "inproc://file_events") || zmq_setsockopt (sub_socket, ZMQ_SUBSCRIBE, NULL, 0))
+  {
+    start->active = 0;
+    fprintf(stderr,"Error opening the reactor: %d\n",zmq_errno());
+    pthread_exit(NULL);
+    return;
+  }               
+  start->socket_connected = 1;
+  int errornumber;
   while(!start->usr_interrupt) 
-  {    
-    zmq_msg_init(&message);    
-    recvreply = RECV_ZMQ_MESSAGE(&message, pull_socket, ZMQ_NOBLOCK);    
-    if(!recvreply) {      
-      msgsize = zmq_msg_size(&message);                  
-      memcpy(&evt,zmq_msg_data(&message),msgsize);      
+  {      
+    zmq_msg_init(&message);
+    if(!zmq_recv(sub_socket, &message, ZMQ_NOBLOCK)) {            
+      msgsize = zmq_msg_size(&message);                    
+      monevent_deserialize(zmq_msg_data(&message),msgsize,&evt);
       action_entry = (monaction_entry *)g_hash_table_lookup(start->conf->actionMap,evt.action_name);
       if(action_entry)
       {
@@ -56,14 +60,19 @@ void *run_reactor(void *startarg)
 	  fprintf(stderr, "FAILED execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
 	}
       } 
-    } else {
+      g_free(evt.action_name);
+      g_free(evt.base_path);
+      g_free(evt.file_path);
+      zmq_msg_close(&message);
+      zmq_msg_init(&message);
+    } else {      
       usleep(500);
-    }
-    zmq_msg_close(&message);
+    }    
+      
   }
-  zmq_close(pull_socket);
+  zmq_close(sub_socket);
   printf("Closing reactor...\n");
   start->active = 0;
-  start->socket_opened = 0;
+  start->socket_connected = 0;
   pthread_exit(NULL);
 }

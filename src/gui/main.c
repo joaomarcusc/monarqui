@@ -45,7 +45,7 @@ void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
   void *rstop_status, *lstop_status;
   if(gui_data->lstart.active)
   {
-    stop_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
+    stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);
   }
   gtk_main_quit();
@@ -75,13 +75,13 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   void *rstop_status, *lstop_status;  
   if(gui_data->lstart.active)
   {
-    stop_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
+    stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
     gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 			      
   }
   else 
   {   
-    start_reactor_and_listener(gui_data->zmq_context, &(gui_data->rthread), &(gui_data->rstart), &rstatus, 
+    start_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);    
     gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 			      
   }

@@ -9,6 +9,7 @@ typedef struct s_liststart
   int usr_interrupt;
   int active;  
   monwatch *watch;
+  short socket_bound;
 } liststart;
 
 

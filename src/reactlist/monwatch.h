@@ -29,12 +29,12 @@ typedef struct s_monwatch_event
 
 typedef struct s_monevent
 {
-  char base_path[2048];  
-  char file_path[2048];  
+  char *base_path;  
+  char *file_path;  
   int event;
   int timestamp;
   int is_dir; 
-  char action_name[64]; // TODO: validate the buffer limits
+  char *action_name; 
 } monevent;
 
 monwatch *monwatch_create();
@@ -50,4 +50,7 @@ short monwatch_should_watch(monconf_entry *entry, char *dir_path);
 int monwatch_num_entries(monwatch *watch);
 void monwatch_iterate(monwatch *watch, GFunc func, gpointer user_data);
 int mask_mon_to_inotify(int mask);
+
+void monevent_serialize(monevent *event, char **buffer, int *buffer_size);
+void monevent_deserialize(char *buffer, int buffer_size, monevent *event);
 #endif

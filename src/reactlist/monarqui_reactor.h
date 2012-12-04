@@ -10,7 +10,7 @@ typedef struct s_reactstart
   monconf *conf;  
   int usr_interrupt;
   int active;
-  int socket_opened;
+  short socket_connected;
 } reactstart; 
 
 void *run_reactor(void *startarg);

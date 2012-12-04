@@ -18,6 +18,8 @@ FIND_LIBRARY(ZEROMQ_LIBRARY
 		$ENV{ZEROMQ_PREFIX}/lib
                 /usr/lib
                 /usr/local/lib
+		$ENV{ZEROMQ_PREFIX}/include
+		${ZEROMQ_PREFIX}/lib
                 ${ZEROMQ_LIBRARIES}
                 ${NSCP_LIBRARYDIR}
 )
@@ -36,7 +38,7 @@ FIND_PATH(ZEROMQ_INCLUDE_DIR
 #               ${ZEROMQ_FRAMEWORK_INCLUDES}
                 ${ZEROMQ_INCLUDE_DIRS}
                 ${NSCP_INCLUDEDIR}
-                ${ZEROMQ_INCLUDE_DIR}
+                ${ZEROMQ_INCLUDE_DIR}		
                 /usr/include
                 /usr/local/include
                 /usr/include

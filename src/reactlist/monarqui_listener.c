@@ -25,6 +25,9 @@ void *run_listener(void *startarg)
   short matched_glob;
   monevent evt;  
   lua_State *L;  
+  char *msgbuf;
+  size_t msgbufsize;
+
   liststart *start = (liststart *)startarg;  
   watch = monwatch_create();
   start->watch = watch;
@@ -32,8 +35,15 @@ void *run_listener(void *startarg)
   printf("Listening for events...\n");
   num_entries = monwatch_num_entries(watch);
  
-  void *push_socket = zmq_socket(start->zmq_context, ZMQ_PUSH);
-  zmq_connect(push_socket, ZMQ_QUEUE_NAME);
+  void *pub_socket = zmq_socket(start->zmq_context, ZMQ_PUB);
+  if(zmq_bind(pub_socket, "inproc://file_events"))
+  {
+    start->active = 0;
+    fprintf(stderr,"Error opening the inotify listener: %d\n",zmq_errno());
+    pthread_exit(NULL);
+    return;
+  }    
+  start->socket_bound = 1;
   zmq_msg_t message;
   
   while(!start->usr_interrupt)
@@ -65,17 +75,20 @@ void *run_listener(void *startarg)
 	      if(!monconf_entry_match_ignores(entry->conf_entry,event->name)
 		&& monconf_action_match_entry_globs(action_entry, full_path))
 	      {
-		strncpy(evt.action_name,action_entry->action->name,64);
+		evt.action_name = action_entry->action->name;
 		evt.timestamp = time(NULL);
-		memset(evt.base_path, 0, 2048);
-		memset(evt.file_path, 0, 2048);
-		strncpy(evt.base_path, entry->file_name, strlen(entry->file_name));
-		strncpy(evt.file_path, event->name, strlen(event->name));
+		evt.base_path = entry->file_name;
+		evt.file_path = event->name;		
 		evt.is_dir = ((event->mask & IN_ISDIR) ? 1 : 0);
-		zmq_msg_init(&message);
-		zmq_msg_init_size(&message,sizeof(monevent));		
-		memcpy(zmq_msg_data(&message), &evt, sizeof(monevent));		
-		SEND_ZMQ_MESSAGE(&message, push_socket, 0);
+		zmq_msg_init(&message);				
+		monevent_serialize(&evt, &msgbuf, &msgbufsize);
+		zmq_msg_init_size(&message,msgbufsize);		
+		memcpy(zmq_msg_data(&message), msgbuf, msgbufsize);			
+		if(zmq_send(pub_socket, &message, 0))
+		{
+		  fprintf(stderr,"Error %d sending message\n",zmq_errno());
+		}		
+		free(msgbuf);		
 		zmq_msg_close(&message);	      
 	      }
 	    }
@@ -93,7 +106,8 @@ void *run_listener(void *startarg)
     usleep(500);
   }
   printf("Closing listener...\n");
-  zmq_close(push_socket);
+  zmq_close(pub_socket);
+  start->socket_bound = 0;
   start->active = 0;
   pthread_exit(NULL);
 }

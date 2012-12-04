@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <lua.h>
+#include <zmq.h>
 
 int str_events_to_int(char *str) 
 {  
