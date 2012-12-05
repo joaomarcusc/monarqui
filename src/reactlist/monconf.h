@@ -2,7 +2,7 @@
 #define _MONCONF_H
 #include <glib.h>
 #include <stdlib.h>
-#include "monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include "monaction.h"
 #include <glob.h>
 #include <lua.h>

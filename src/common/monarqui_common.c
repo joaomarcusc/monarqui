@@ -1,7 +1,12 @@
 #include "monarqui_common.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <glib.h>
 #include <lua.h>
 #include <zmq.h>
 
@@ -41,4 +46,24 @@ void show_lua_error(lua_State *L, char *msg){
 void bail(lua_State *L, char *msg){
 	show_lua_error(L,msg);
 	exit(1);
+}
+
+void monarqui_prepare_config_directory()
+{
+  struct stat st;
+  char *home = getenv("HOME");
+  char *config_dir;
+  char *config_file_path;
+  config_dir = g_strdup_printf("%s/.monarqui", home);
+  if(stat(config_dir, &st) < 0)
+  {
+    printf("Config directory %s does't exist, creating...\n",config_dir);
+    mkdir(config_dir, 0750);
+  }
+  config_file_path = g_strdup_printf("%s/config.xml",config_dir);
+  if(stat(config_file_path, &st) < 0)
+  {
+    printf("Creating config file under %s\n...",config_file_path);
+  }
+  g_free(config_dir);
 }

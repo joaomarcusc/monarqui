@@ -7,7 +7,7 @@
 #include <fnmatch.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "monarqui_common.h"
+#include "../common/monarqui_common.h"
 #define EVENT_SIZE  ( sizeof (struct inotify_event) )
 #define EVENT_BUF_LEN     ( 32 * ( EVENT_SIZE + 16 ) )
 int check_filters_for_event(struct inotify_event *event, monwatch_entry *watch_entry);

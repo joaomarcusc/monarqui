@@ -32,5 +32,5 @@
 int str_events_to_int(char *str);
 void bail(lua_State *L, char *msg);
 void show_lua_error(lua_State *L, char *msg);
-int receive_zmq_message(void *socket, void *buffer, int *msgsize);
+void monarqui_prepare_config_directory();
 #endif

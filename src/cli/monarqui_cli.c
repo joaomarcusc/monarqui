@@ -4,7 +4,7 @@
 #include "../reactlist/monarqui_threads.h"
 #include "../reactlist/monarqui_listener.h"
 #include "../reactlist/monarqui_reactor.h"
-#include "../reactlist/monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -35,14 +35,12 @@ int main(int argc, char **argv)
   monconf *conf;  
   int signum;
   sigset_t oldmask, mask, pendingMask;
-   
   sigemptyset(&mask);
   sigemptyset(&oldmask);
   sigaddset(&mask,SIGHUP);
   sigaddset(&mask,SIGSTOP);
   sigaddset(&mask,SIGQUIT);
   sigprocmask(SIG_BLOCK, &mask, &oldmask);
-    
   start_reactor_and_listener(&rthread, &rstart, &rinitstatus, &lthread, &lstart, &linitstatus);
   while(1) 
   {

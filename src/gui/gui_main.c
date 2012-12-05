@@ -1,9 +1,10 @@
+#include "gui_main.h"
 #include "../reactlist/monconf.h"
 #include "../reactlist/monwatch.h"
 #include "../reactlist/monarqui_threads.h"
 #include "../reactlist/monarqui_listener.h"
 #include "../reactlist/monarqui_reactor.h"
-#include "../reactlist/monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -164,13 +165,20 @@ void on_systray_clicked(GtkStatusIcon *status_icon, gpointer user_data)
     gtk_window_deiconify((GtkWindow *)gui_data->windowMain);  
 }
 
+void create_config_dir()
+{
+
+}
+
 int main (int argc, char *argv[])
 {
   struct s_gui_data data;  
-    
+
+  monarqui_prepare_config_directory();
+
   data.rstart.active = 0;
   data.lstart.active = 0;
-    
+  
   GtkBuilder      *builder; 
   GtkStatusIcon *systray_icon;
   gtk_init (&argc, &argv);

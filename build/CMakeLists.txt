@@ -42,16 +42,19 @@ if (LUA51_FOUND)
   link_directories(${LUA_LIBRARIES})
 endif()
 set(monarqui_reactlist_LIBRARIES ${LIBXML2_DEFINITIONS} ${GLIB_LIBRARIES} ${ZEROMQ_LIBRARIES} ${ZEROMQ_LIBRARY} ${LIBXML2_LIBRARIES} ${LIBXML2_DEFINITIONS} ${LUA_LIBRARIES})
+file(GLOB monarqui_common_SOURCES ../src/common/*.c)
+file(GLOB monarqui_common_HEADERS ../src/common/*.h)
+
 file(GLOB monarqui_reactlist_SOURCES ../src/reactlist/*.c)
 file(GLOB monarqui_reactlist_HEADERS ../src/reactlist/*.h)
 
 set(monarqui_cli_LIBRARIES ${monarqui_reactlist_LIBRARIES})
-file(GLOB monarqui_cli_SOURCES ${monarqui_reactlist_SOURCES} ../src/cli/*.c)
-file(GLOB monarqui_cli_HEADERS ${monarqui_reactlist_HEADERS} ../src/cli/*.h)
+file(GLOB monarqui_cli_SOURCES ${monarqui_common_SOURCES} ${monarqui_reactlist_SOURCES} ../src/cli/*.c)
+file(GLOB monarqui_cli_HEADERS ${monarqui_common_HEADERS} ${monarqui_reactlist_HEADERS} ../src/cli/*.h)
 
 set(monarqui_gui_LIBRARIES ${monarqui_reactlist_LIBRARIES} ${GTK2_LIBRARIES})
-file(GLOB monarqui_gui_SOURCES ${monarqui_reactlist_SOURCES} ../src/gui/*.c)
-file(GLOB monarqui_gui_HEADERS ${monarqui_reactlist_HEADERS} ../src/gui/*.h)
+file(GLOB monarqui_gui_SOURCES ${monarqui_common_SOURCES} ${monarqui_reactlist_SOURCES} ../src/gui/*.c)
+file(GLOB monarqui_gui_HEADERS ${monarqui_common_HEADERS} ${monarqui_reactlist_HEADERS} ../src/gui/*.h)
 
 set(CMAKE_C_FLAGS "-ffunction-sections -fdata-sections")
 

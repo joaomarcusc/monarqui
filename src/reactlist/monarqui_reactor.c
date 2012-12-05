@@ -1,6 +1,6 @@
 #include "monarqui_reactor.h"
 #include "monconf.h"
-#include "monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include <zmq.h>
 #include <unistd.h>
 #include <string.h>

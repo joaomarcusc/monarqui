@@ -3,7 +3,7 @@
 #include "../reactlist/monwatch.h"
 #include "../reactlist/monarqui_listener.h"
 #include "../reactlist/monarqui_reactor.h"
-#include "../reactlist/monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include <stdio.h>
 #include <time.h>
 #include <string.h>

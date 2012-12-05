@@ -1,4 +1,4 @@
-#include "monarqui_common.h"
+#include "../common/monarqui_common.h"
 #include "monaction.h"
 #include "monconf.h"
 #include <string.h>
