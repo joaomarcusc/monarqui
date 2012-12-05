@@ -48,27 +48,26 @@ void *run_reactor(void *startarg)
         lua_pushstring(L, evt.file_path);
         lua_pushinteger(L, evt.timestamp);
         if (lua_pcall(L, 4, 1, 0))         
-	    show_lua_error(L, "lua_pcall() failed");     
+          show_lua_error(L, "lua_pcall() failed");     
         int retval = lua_toboolean(L,-1);
-	lua_pop(L, 1);      
-	if(retval)
-	{
-	  printf("Execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
-	}
-	else 
-	{
-	  fprintf(stderr, "FAILED execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
-	}
+        lua_pop(L, 1);      
+        if(retval)
+        {
+          printf("Execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
+        }
+        else 
+        {
+          fprintf(stderr, "FAILED execution action %s for event %d on %s/%s:\n",evt.action_name, evt.event, evt.base_path, evt.file_path);
+        }
       } 
-      g_free(evt.action_name);
-      g_free(evt.base_path);
-      g_free(evt.file_path);
+      free(evt.file_path);
+      free(evt.action_name);
+      free(evt.base_path);
       zmq_msg_close(&message);
-      zmq_msg_init(&message);
     } else {      
+      zmq_msg_close(&message);
       usleep(500);
     }    
-      
   }
   zmq_close(sub_socket);
   printf("Closing reactor...\n");

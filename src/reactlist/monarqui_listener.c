@@ -55,52 +55,52 @@ void *run_listener(void *startarg)
     {
       struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
       if(event->len)
-      {			
-	entry = (monwatch_entry *)g_hash_table_lookup(watch->wdescr_map,(gpointer)event->wd);		
-	char *full_path = g_strdup_printf("%s/%s",entry->file_name,event->name);
-	evt.event = check_event(event->mask,entry->conf_entry->events);	
-	if(evt.event && check_filters_for_event(event, entry)) 
-	{
-	  if(event->mask & IN_ISDIR && ((event->mask & IN_CREATE) || (event->mask & IN_MOVED_TO))
-	      && (entry->conf_entry->recursive)) 
-	  {
-	    _monwatch_add_item(watch, entry->conf_entry, full_path);
-	  }	  	  
-  	  action_item = g_list_first(entry->conf_entry->actions);
-	  while(action_item)
-	  {
-	    action_entry = (monconf_action_entry *)action_item->data;	    
-	    if(evt.event & entry->conf_entry->events)
-	    {      
-	      if(!monconf_entry_match_ignores(entry->conf_entry,event->name)
-		&& monconf_action_match_entry_globs(action_entry, full_path))
-	      {
-		evt.action_name = action_entry->action->name;
-		evt.timestamp = time(NULL);
-		evt.base_path = entry->file_name;
-		evt.file_path = event->name;		
-		evt.is_dir = ((event->mask & IN_ISDIR) ? 1 : 0);
-		zmq_msg_init(&message);				
-		monevent_serialize(&evt, &msgbuf, &msgbufsize);
-		zmq_msg_init_size(&message,msgbufsize);		
-		memcpy(zmq_msg_data(&message), msgbuf, msgbufsize);			
-		if(zmq_send(pub_socket, &message, 0))
-		{
-		  fprintf(stderr,"Error %d sending message\n",zmq_errno());
-		}		
-		free(msgbuf);		
-		zmq_msg_close(&message);	      
-	      }
-	    }
-	    action_item = action_item->next;
-	  }
-	  g_free(full_path);
-	}		
-	if(event->mask & IN_ISDIR && ((event->mask & IN_DELETE) || (event->mask & IN_MOVED_FROM)))
-	{
-	  _monwatch_delete_item(watch, entry, event->name);
-	}			
-      }      
+      {
+        entry = (monwatch_entry *)g_hash_table_lookup(watch->wdescr_map,(gpointer)event->wd);
+        char *full_path = g_strdup_printf("%s/%s",entry->file_name,event->name);
+        evt.event = check_event(event->mask,entry->conf_entry->events);
+        if(evt.event && check_filters_for_event(event, entry)) 
+        {
+          if(event->mask & IN_ISDIR && ((event->mask & IN_CREATE) || (event->mask & IN_MOVED_TO))
+              && (entry->conf_entry->recursive)) 
+          {
+            _monwatch_add_item(watch, entry->conf_entry, full_path);
+          }
+          action_item = g_list_first(entry->conf_entry->actions);
+          while(action_item)
+          {
+            action_entry = (monconf_action_entry *)action_item->data;    
+            if(evt.event & entry->conf_entry->events)
+            {
+              if(!monconf_entry_match_ignores(entry->conf_entry,event->name)
+                  && monconf_action_match_entry_globs(action_entry, full_path))
+              {
+                evt.action_name = action_entry->action->name;
+                evt.timestamp = time(NULL);
+                evt.base_path = entry->file_name;
+                evt.file_path = event->name;
+                evt.is_dir = ((event->mask & IN_ISDIR) ? 1 : 0);
+                zmq_msg_init(&message);
+                monevent_serialize(&evt, &msgbuf, &msgbufsize);
+                zmq_msg_init_size(&message,msgbufsize);
+                memcpy(zmq_msg_data(&message), msgbuf, msgbufsize);
+                if(zmq_send(pub_socket, &message, 0))
+                {
+                  fprintf(stderr,"Error %d sending message\n",zmq_errno());
+                }
+                free(msgbuf);
+                zmq_msg_close(&message);      
+              }
+            }
+            action_item = action_item->next;
+          }
+          g_free(full_path);
+        }
+        if(event->mask & IN_ISDIR && ((event->mask & IN_DELETE) || (event->mask & IN_MOVED_FROM)))
+        {
+          _monwatch_delete_item(watch, entry, event->name);
+        }
+      }
       i += EVENT_SIZE + event->len;
     }
     usleep(500);
