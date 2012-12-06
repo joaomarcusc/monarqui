@@ -26,11 +26,19 @@
 #define MON_ACT_LOG 4
 
 #define STR_EVENT_SEPARATOR ","
+#define DEFAULT_CONFIG_PATH "config.xml"
+
 #include <zmq.h>
 #include <lua.h>
-
+struct config_args 
+{
+  char *config_path;   
+};
 int str_events_to_int(char *str);
 void bail(lua_State *L, char *msg);
 void show_lua_error(lua_State *L, char *msg);
 void monarqui_prepare_config_directory();
+void monarqui_parse_cli_args(struct config_args *args,int argc, char **argv);
+void monarqui_free_cli_args(struct config_args *args);
+void monarqui_find_config(struct config_args *args);
 #endif

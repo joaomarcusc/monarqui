@@ -15,7 +15,7 @@
 #include <linux/inotify.h>
 #include <glib.h>
 
-void start_reactor_and_listener(pthread_t* rthread, reactstart* rstart, int *rstatus, pthread_t* lthread, liststart* lstart, int *lstatus)
+void start_reactor_and_listener(struct config_args *args, pthread_t* rthread, reactstart* rstart, int *rstatus, pthread_t* lthread, liststart* lstart, int *lstatus)
 {
   pthread_attr_t attr;
   int ltr, rtr;    
@@ -23,7 +23,7 @@ void start_reactor_and_listener(pthread_t* rthread, reactstart* rstart, int *rst
   int signum;      
   
   conf = monconf_create();
-  monconf_read_config(conf,"config.xml");
+  monconf_read_config(conf,args->config_path);
   monconf_execute_preload_actions(conf);
   rstart->conf = conf;
   rstart->zmq_context = zmq_init(0);

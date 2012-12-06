@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <getopt.h>
 #include <glib.h>
 #include <lua.h>
 #include <zmq.h>
@@ -66,4 +67,64 @@ void monarqui_prepare_config_directory()
     printf("Creating config file under %s\n...",config_file_path);
   }
   g_free(config_dir);
+}
+
+void monarqui_parse_cli_args(struct config_args *args,int argc, char **argv)
+{  
+  args->config_path = NULL;
+  while(1)
+  {
+    static struct option options[] = {
+      {"config", 1, 0, 'c'}
+    };
+    int option_index = 0;
+    int c;
+    c = getopt_long (argc, argv, "c",
+		      options, &option_index);
+    if(c == -1)
+      break;
+    switch(c) 
+    {
+      case 'c':
+	args->config_path = g_strdup_printf("%s",optarg);
+	break;
+    }  
+  }
+  if(!args->config_path)
+    monarqui_find_config(args);
+  if(!args->config_path)
+  {
+    fprintf(stderr,"Couldn't find the config.xml file\n");
+    exit(1);
+  }
+    
+}
+
+void monarqui_free_cli_args(struct config_args *args)
+{
+  if(args->config_path)
+    g_free(args->config_path);
+}
+
+void monarqui_find_config(struct config_args *args)
+{  
+  struct stat st;
+  char *home;
+  char *config_file_path;
+  
+  if(stat("config.xml",&st) >= 0)
+  {
+    args->config_path = g_strdup("config.xml");    
+  }
+  else 
+  {
+    home = getenv("HOME");
+    config_file_path = g_strdup_printf("%s/.monarqui/config.xml", home);  
+    if(stat("config.xml",&st) >= 0)
+    {
+      args->config_path = g_strdup(config_file_path);      
+    }
+    free(home);
+    free(config_file_path);
+  }    
 }

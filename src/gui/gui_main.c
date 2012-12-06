@@ -28,7 +28,7 @@ struct s_gui_data
   reactstart rstart;
   liststart lstart;  
   void *zmq_context;
-  
+  struct config_args *args;
   GtkWidget *windowMain;
   GtkWidget *windowConfig;
   
@@ -133,7 +133,7 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   }
   else 
   {   
-    start_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
+    start_reactor_and_listener(gui_data->args, &(gui_data->rthread), &(gui_data->rstart), &rstatus, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
     on_reactlist_start(gui_data);
   }
@@ -173,7 +173,10 @@ void create_config_dir()
 int main (int argc, char *argv[])
 {
   struct s_gui_data data;  
-
+  struct config_args args;
+  args.config_path = NULL;
+  monarqui_parse_cli_args(&args, argc, argv);  
+    
   monarqui_prepare_config_directory();
 
   data.rstart.active = 0;
@@ -193,7 +196,7 @@ int main (int argc, char *argv[])
   data.action_configClose = GTK_ACTION(gtk_builder_get_object(builder, "action_configClose"));
   data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(builder,"image_startStop"));  
-
+  data.args = &args;
   data.treeviewEntries = (GtkTreeView *) GTK_TREE_VIEW(gtk_builder_get_object(builder,"treeviewEntries"));
   data.listStoreActions = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreActions"));  
   data.listStoreEntries = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreEntries"));  
@@ -209,5 +212,6 @@ int main (int argc, char *argv[])
   gtk_widget_show (data.windowMain);                
   gtk_main ();
   
+  monarqui_free_cli_args(&args);
   return 0;
 }
