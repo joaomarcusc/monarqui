@@ -8,6 +8,9 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <getopt.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -449,4 +452,84 @@ int monconf_entry_match_ignores(monconf_entry *conf_entry, const char *file_name
     item = item->next;
   }
   return 0;
+}
+
+void monconf_prepare_config_directory()
+{
+  struct stat st;
+  char *home = getenv("HOME");
+  char *config_dir;
+  char *config_file_path;
+  config_dir = g_strdup_printf("%s/.monarqui", home);
+  if(stat(config_dir, &st) < 0)
+  {
+    printf("Config directory %s does't exist, creating...\n",config_dir);
+    mkdir(config_dir, 0750);
+  }
+  config_file_path = g_strdup_printf("%s/config.xml",config_dir);
+  if(stat(config_file_path, &st) < 0)
+  {
+    printf("Creating config file under %s\n...",config_file_path);
+  }
+  g_free(config_dir);
+}
+
+void monconf_parse_cli_args(config_args*args,int argc, char **argv)
+{  
+  args->config_path = NULL;
+  while(1)
+  {
+    static struct option options[] = {
+      {"config", 1, 0, 'c'}
+    };
+    int option_index = 0;
+    int c;
+    c = getopt_long (argc, argv, "c",
+		      options, &option_index);
+    if(c == -1)
+      break;
+    switch(c) 
+    {
+      case 'c':
+	args->config_path = g_strdup_printf("%s",optarg);
+	break;
+    }  
+  }
+  if(!args->config_path)
+    monconf_find_config(args);
+  if(!args->config_path)
+  {
+    fprintf(stderr,"Couldn't find the config.xml file\n");
+    exit(1);
+  }
+    
+}
+
+void monconf_free_cli_args(config_args*args)
+{
+  if(args->config_path)
+    g_free(args->config_path);
+}
+
+void monconf_find_config(config_args*args)
+{  
+  struct stat st;
+  char *home;
+  char *config_file_path;
+  
+  if(stat("config.xml",&st) >= 0)
+  {
+    args->config_path = g_strdup("config.xml");    
+  }
+  else 
+  {
+    home = getenv("HOME");
+    config_file_path = g_strdup_printf("%s/.monarqui/config.xml", home);  
+    if(stat("config.xml",&st) >= 0)
+    {
+      args->config_path = g_strdup(config_file_path);      
+    }
+    free(home);
+    free(config_file_path);
+  }    
 }

@@ -28,7 +28,8 @@ struct s_gui_data
   reactstart rstart;
   liststart lstart;  
   void *zmq_context;
-  struct config_args *args;
+  config_args *args;
+  monconf *conf;
   GtkWidget *windowMain;
   GtkWidget *windowConfig;
   
@@ -44,6 +45,8 @@ struct s_gui_data
   
   GtkTreeView *treeviewEntries;
 };
+
+void populate_config(struct s_gui_data *gui_data);
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 {
@@ -71,41 +74,7 @@ void on_action_configClose_activate(GtkAction *action, gpointer user_data)
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
 {
-  enum
-  {
-    COL_ENTRY_PATH = 0,
-    COL_ENTRY_RECURSIVE,
-    COL_ENTRY_EVENTS,
-    COL_ENTRY_IGNORE
-  };
-  GtkTreeModel *modelEntries;
-  GtkTreeIter iter;
 
-  gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
-
-  modelEntries = gtk_tree_view_get_model(GTK_TREE_VIEW(gui_data->treeviewEntries));
-  g_object_ref(modelEntries); 
-  gtk_tree_view_set_model(GTK_TREE_VIEW(gui_data->treeviewEntries), NULL); /* Detach model from view */
-
-  gtk_list_store_clear(gui_data->listStoreEntries);
-  GList *item = g_list_first(gui_data->lstart.conf->entrylist);
-  while(item)
-  {
-    monconf_entry *entry = (monconf_entry *)item->data;
-    gtk_list_store_append(gui_data->listStoreEntries, &iter);
-    gtk_list_store_set(gui_data->listStoreEntries,&iter,
-		       COL_ENTRY_PATH, entry->file_name,
-		       COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
-		       COL_ENTRY_EVENTS, g_strdup_printf("%d",entry->events),
-		       
-		       -1
-		      );
-  
-    item = item->next;
-  }
-  gtk_tree_view_set_model(GTK_TREE_VIEW(gui_data->treeviewEntries), modelEntries); /* Re-attach model to view */
-
-  g_object_unref(modelEntries);  
 }
 
 void on_reactlist_stop(struct s_gui_data *gui_data) 
@@ -128,12 +97,14 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   {
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
-  
+    monconf_free(gui_data->rstart.conf);
     on_reactlist_stop(gui_data);
   }
   else 
   {   
-    start_reactor_and_listener(gui_data->args, &(gui_data->rthread), &(gui_data->rstart), &rstatus, 
+    monconf *conf = monconf_create();
+    monconf_read_config(conf, gui_data->args->config_path);
+    start_reactor_and_listener(conf,&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
     on_reactlist_start(gui_data);
   }
@@ -173,19 +144,20 @@ void create_config_dir()
 int main (int argc, char *argv[])
 {
   struct s_gui_data data;  
-  struct config_args args;
+  config_args args;
   args.config_path = NULL;
-  monarqui_parse_cli_args(&args, argc, argv);  
+  monconf_parse_cli_args(&args, argc, argv);  
     
-  monarqui_prepare_config_directory();
-
+  monconf_prepare_config_directory();
+  monconf *conf = monconf_create();
+  monconf_read_config(conf, args.config_path);
   data.rstart.active = 0;
   data.lstart.active = 0;
   
   GtkBuilder      *builder; 
   GtkStatusIcon *systray_icon;
   gtk_init (&argc, &argv);
-
+  
   builder = gtk_builder_new ();
   gtk_builder_add_from_file (builder, "ui-glade/monarqui_gui.glade", NULL);  
   
@@ -197,6 +169,7 @@ int main (int argc, char *argv[])
   data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(builder,"image_startStop"));  
   data.args = &args;
+  data.conf = conf;
   data.treeviewEntries = (GtkTreeView *) GTK_TREE_VIEW(gtk_builder_get_object(builder,"treeviewEntries"));
   data.listStoreActions = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreActions"));  
   data.listStoreEntries = (GtkListStore *) GTK_LIST_STORE(gtk_builder_get_object(builder,"listStoreEntries"));  
@@ -206,12 +179,43 @@ int main (int argc, char *argv[])
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
   systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
   gtk_status_icon_set_visible(systray_icon, TRUE);
- 
-  g_object_unref (G_OBJECT (builder));
-    
+  populate_config(&data);
+  g_object_unref (G_OBJECT (builder));    
+  
   gtk_widget_show (data.windowMain);                
   gtk_main ();
   
-  monarqui_free_cli_args(&args);
+  monconf_free(conf);
+  monconf_free_cli_args(&args);
   return 0;
+}
+
+void populate_config(struct s_gui_data *gui_data) 
+{
+  enum
+  {
+    COL_ENTRY_PATH = 0,
+    COL_ENTRY_RECURSIVE,
+    COL_ENTRY_EVENTS,
+    COL_ENTRY_IGNORE
+  };
+  GtkTreeModel *modelEntries;
+  GtkTreeIter iter;
+
+  gtk_list_store_clear(gui_data->listStoreEntries);
+  GList *item = g_list_first(gui_data->conf->entrylist);
+  while(item)
+  {
+    monconf_entry *entry = (monconf_entry *)item->data;
+    gtk_list_store_append(gui_data->listStoreEntries, &iter);
+    gtk_list_store_set(gui_data->listStoreEntries,&iter,
+		       COL_ENTRY_PATH, entry->file_name,
+		       COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
+		       COL_ENTRY_EVENTS, g_strdup_printf("%d",entry->events),
+		       COL_ENTRY_IGNORE, g_strdup_printf("%d",entry->events),		       
+		       -1
+		      );
+  
+    item = item->next;
+  }
 }

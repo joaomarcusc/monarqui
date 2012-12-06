@@ -37,6 +37,12 @@ typedef struct s_monconf
   GHashTable *actionMap;
 } monconf;
 
+typedef struct s_config_args 
+{
+  char *config_path;  
+  monconf *conf;
+} config_args;
+
 monconf *monconf_create();
 void monconf_read_config(monconf *conf,const char *cfg_file);
 void monconf_free(monconf *conf);
@@ -61,4 +67,9 @@ void monconf_dump(monconf *conf);
 void monconf_execute_preload_actions(monconf *conf);
 int monconf_action_match_entry_globs(monconf_action_entry *action_entry, const char *full_path);
 int monconf_entry_match_ignores(monconf_entry *conf_entry, const char *file_name);
+void monconf_prepare_config_directory();
+void monconf_parse_cli_args(config_args *args,int argc, char **argv);
+void monconf_free_cli_args(config_args *args);
+void monconf_find_config(config_args *args);
+
 #endif

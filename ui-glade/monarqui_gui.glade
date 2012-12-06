@@ -1,23 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkAction" id="action_configClose">
-    <signal name="activate" handler="on_action_configClose_activate" swapped="no"/>
+    <signal name="activate" handler="on_action_configClose_activate"/>
   </object>
   <object class="GtkAction" id="action_configOpen">
-    <signal name="activate" handler="on_action_configOpen_activate" swapped="no"/>
+    <signal name="activate" handler="on_action_configOpen_activate"/>
   </object>
   <object class="GtkAction" id="action_mainExit">
     <property name="stock_id">gtk-quit</property>
-    <signal name="activate" handler="on_action_mainExit_activate" swapped="no"/>
+    <signal name="activate" handler="on_action_mainExit_activate"/>
   </object>
   <object class="GtkAction" id="action_startPause">
-    <signal name="activate" handler="on_action_startPause_activate" swapped="no"/>
+    <signal name="activate" handler="on_action_startPause_activate"/>
   </object>
   <object class="GtkImage" id="image_startStop">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="icon_name">gtk-media-play-ltr</property>
   </object>
   <object class="GtkListStore" id="listStoreEntries">
@@ -31,35 +30,42 @@
       <!-- column-name ignore_files -->
       <column type="gchararray"/>
     </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">sdfgsdfg</col>
+        <col id="1">True</col>
+        <col id="2" translatable="yes">afdsds</col>
+        <col id="3" translatable="yes">234242</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes"></col>
+        <col id="1">True</col>
+        <col id="2" translatable="yes">1242134</col>
+        <col id="3" translatable="yes"></col>
+      </row>
+    </data>
   </object>
   <object class="GtkWindow" id="windowMain">
-    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Monarqui 0.1.3 - Main</property>
     <property name="window_position">center</property>
-    <signal name="destroy" handler="on_windowMain_destroy" swapped="no"/>
+    <signal name="destroy" handler="on_windowMain_destroy"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkMenuItem" id="menuitem1">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Arquivo</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menuArquivo">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="&amp;_Sair">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="related_action">action_mainExit</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
@@ -72,19 +78,16 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkToolbar" id="toolbar">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_size">8</property>
             <child>
               <object class="GtkToolButton" id="btnStart">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="related_action">action_startPause</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
@@ -98,7 +101,6 @@
             <child>
               <object class="GtkToolButton" id="btnStop">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="related_action">action_mainExit</property>
                 <property name="label" translatable="yes">quit</property>
                 <property name="use_underline">True</property>
@@ -111,7 +113,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
@@ -120,17 +121,64 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkTreeView" id="treeviewEntries">
+              <object class="GtkTreeView" id="treeview2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">listStoreEntries</property>
-                <property name="search_column">0</property>
+                <property name="enable_grid_lines">both</property>
+                <property name="enable_tree_lines">True</property>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                    <property name="resizable">True</property>
+                    <property name="title">Path</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn2">
+                    <property name="resizable">True</property>
+                    <property name="title">Recursive</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle1"/>
+                      <attributes>
+                        <attribute name="active">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn3">
+                    <property name="resizable">True</property>
+                    <property name="title">Events</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                      <attributes>
+                        <attribute name="text">2</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn4">
+                    <property name="title">Ignore Files</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
             <child type="tab">
               <object class="GtkLabel" id="labelTabEntries">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Entries</property>
               </object>
               <packing>
@@ -139,8 +187,6 @@
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>

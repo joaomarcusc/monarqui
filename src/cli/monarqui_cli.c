@@ -26,7 +26,7 @@ void interrupt_main(int sig)
 
 int main(int argc, char **argv) 
 {  
-  struct config_args args;
+  config_args args;
   pthread_t rthread, lthread;
   reactstart rstart;
   liststart lstart; 
@@ -36,16 +36,17 @@ int main(int argc, char **argv)
   monconf *conf;  
   int signum;
   sigset_t oldmask, mask, pendingMask;
-  monarqui_prepare_config_directory();
-  monarqui_parse_cli_args(&args, argc, argv);
-  
+  monconf_prepare_config_directory();
+  monconf_parse_cli_args(&args, argc, argv);
+  conf = monconf_create();
+  monconf_read_config(conf, args.config_path);
   sigemptyset(&mask);
   sigemptyset(&oldmask);
   sigaddset(&mask,SIGHUP);
   sigaddset(&mask,SIGSTOP);
   sigaddset(&mask,SIGQUIT);
   sigprocmask(SIG_BLOCK, &mask, &oldmask);
-  start_reactor_and_listener(&args, &rthread, &rstart, &rinitstatus, &lthread, &lstart, &linitstatus);
+  start_reactor_and_listener(conf, &rthread, &rstart, &rinitstatus, &lthread, &lstart, &linitstatus);
   while(1) 
   {
     sigpending(&pendingMask);
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
   fflush(stdout);
   fflush(stderr);
   
-  monarqui_free_cli_args(&args);
+  monconf_free_cli_args(&args);
   return EXIT_SUCCESS;
 }
 
