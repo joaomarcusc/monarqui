@@ -196,7 +196,12 @@ void populate_config(struct s_gui_data *gui_data)
   {
     COL_ENTRY_PATH = 0,
     COL_ENTRY_RECURSIVE,
-    COL_ENTRY_EVENTS,
+    COL_ENTRY_EVENT_CREATE,
+    COL_ENTRY_EVENT_MODIFY,
+    COL_ENTRY_EVENT_DELETE,
+    COL_ENTRY_EVENT_ATTRIBS,
+    COL_ENTRY_EVENT_MOVED_FROM,
+    COL_ENTRY_EVENT_MOVED_TO,    
     COL_ENTRY_IGNORE
   };
   GtkTreeModel *modelEntries;
@@ -211,7 +216,12 @@ void populate_config(struct s_gui_data *gui_data)
     gtk_list_store_set(gui_data->listStoreEntries,&iter,
 		       COL_ENTRY_PATH, entry->file_name,
 		       COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
-		       COL_ENTRY_EVENTS, g_strdup_printf("%d",entry->events),
+		       COL_ENTRY_EVENT_CREATE, (gboolean)(entry->events & MON_CREATE),
+		       COL_ENTRY_EVENT_MODIFY, (gboolean)(entry->events & MON_MODIFY),
+		       COL_ENTRY_EVENT_DELETE, (gboolean)(entry->events & MON_DELETE),
+		       COL_ENTRY_EVENT_ATTRIBS, (gboolean)(entry->events & MON_ATTRIB),
+		       COL_ENTRY_EVENT_MOVED_FROM, (gboolean)(entry->events & MON_MOVED_FROM),
+		       COL_ENTRY_EVENT_MOVED_TO, (gboolean)(entry->events & MON_MOVED_TO),
 		       COL_ENTRY_IGNORE, g_strdup_printf("%d",entry->events),		       
 		       -1
 		      );

@@ -25,23 +25,43 @@
       <column type="gchararray"/>
       <!-- column-name recursive -->
       <column type="gboolean"/>
-      <!-- column-name events -->
-      <column type="gchararray"/>
+      <!-- column-name event_create -->
+      <column type="gboolean"/>
+      <!-- column-name event_modify -->
+      <column type="gboolean"/>
+      <!-- column-name event_delete -->
+      <column type="gboolean"/>
+      <!-- column-name event_attrib -->
+      <column type="gboolean"/>
+      <!-- column-name event_moved_from -->
+      <column type="gboolean"/>
+      <!-- column-name event_moved_to -->
+      <column type="gboolean"/>
       <!-- column-name ignore_files -->
       <column type="gchararray"/>
     </columns>
     <data>
       <row>
         <col id="0" translatable="yes">sdfgsdfg</col>
-        <col id="1">True</col>
-        <col id="2" translatable="yes">afdsds</col>
-        <col id="3" translatable="yes">234242</col>
+        <col id="1">False</col>
+        <col id="2">False</col>
+        <col id="3">False</col>
+        <col id="4">False</col>
+        <col id="5">False</col>
+        <col id="6">False</col>
+        <col id="7">False</col>
+        <col id="8" translatable="yes"/>
       </row>
       <row>
         <col id="0" translatable="yes"></col>
-        <col id="1">True</col>
-        <col id="2" translatable="yes">1242134</col>
-        <col id="3" translatable="yes"></col>
+        <col id="1">False</col>
+        <col id="2">False</col>
+        <col id="3">False</col>
+        <col id="4">False</col>
+        <col id="5">False</col>
+        <col id="6">False</col>
+        <col id="7">False</col>
+        <col id="8" translatable="yes"/>
       </row>
     </data>
   </object>
@@ -131,9 +151,11 @@
                   <object class="GtkTreeViewColumn" id="treeviewcolumn1">
                     <property name="resizable">True</property>
                     <property name="title">Path</property>
+                    <property name="clickable">True</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext1"/>
                       <attributes>
+                        <attribute name="editable">1</attribute>
                         <attribute name="text">0</attribute>
                       </attributes>
                     </child>
@@ -143,33 +165,90 @@
                   <object class="GtkTreeViewColumn" id="treeviewcolumn2">
                     <property name="resizable">True</property>
                     <property name="title">Recursive</property>
+                    <property name="clickable">True</property>
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle1"/>
                       <attributes>
+                        <attribute name="visible">1</attribute>
+                        <attribute name="activatable">1</attribute>
                         <attribute name="active">1</attribute>
                       </attributes>
                     </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="treeviewcolumn3">
-                    <property name="resizable">True</property>
-                    <property name="title">Events</property>
+                  <object class="GtkTreeViewColumn" id="column3">
+                    <property name="title">Create</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle2"/>
                       <attributes>
-                        <attribute name="text">2</attribute>
+                        <attribute name="visible">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn3">
+                    <property name="title">Modify</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle3"/>
+                      <attributes>
+                        <attribute name="visible">1</attribute>
                       </attributes>
                     </child>
                   </object>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn4">
-                    <property name="title">Ignore Files</property>
+                    <property name="title">Delete</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle4"/>
                       <attributes>
-                        <attribute name="text">3</attribute>
+                        <attribute name="visible">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn5">
+                    <property name="title">Attrs</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle5"/>
+                      <attributes>
+                        <attribute name="visible">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn6">
+                    <property name="title">Moved From</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle6"/>
+                      <attributes>
+                        <attribute name="visible">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn7">
+                    <property name="title">Moved To</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="cellrenderertoggle7"/>
+                      <attributes>
+                        <attribute name="visible">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn8">
+                    <property name="title">Ignores</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                      <attributes>
+                        <attribute name="visible">1</attribute>
                       </attributes>
                     </child>
                   </object>
