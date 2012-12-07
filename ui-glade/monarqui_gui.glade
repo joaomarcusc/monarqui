@@ -50,7 +50,7 @@
         <col id="5">False</col>
         <col id="6">False</col>
         <col id="7">False</col>
-        <col id="8" translatable="yes"/>
+        <col id="8" translatable="yes"></col>
       </row>
       <row>
         <col id="0" translatable="yes"></col>
@@ -61,7 +61,7 @@
         <col id="5">False</col>
         <col id="6">False</col>
         <col id="7">False</col>
-        <col id="8" translatable="yes"/>
+        <col id="8" translatable="yes"></col>
       </row>
     </data>
   </object>
@@ -151,7 +151,6 @@
                   <object class="GtkTreeViewColumn" id="treeviewcolumn1">
                     <property name="resizable">True</property>
                     <property name="title">Path</property>
-                    <property name="clickable">True</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext1"/>
                       <attributes>
@@ -165,7 +164,6 @@
                   <object class="GtkTreeViewColumn" id="treeviewcolumn2">
                     <property name="resizable">True</property>
                     <property name="title">Recursive</property>
-                    <property name="clickable">True</property>
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle1"/>
                       <attributes>
