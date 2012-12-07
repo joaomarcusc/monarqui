@@ -27,10 +27,12 @@
 
 #define STR_EVENT_SEPARATOR ","
 #define DEFAULT_CONFIG_PATH "config.xml"
-
+#include <glib.h>
 #include <zmq.h>
 #include <lua.h>
 
+char *string_join(GList *list);
+char *int_events_to_str(int events);
 int str_events_to_int(char *str);
 void bail(lua_State *L, char *msg);
 void show_lua_error(lua_State *L, char *msg);

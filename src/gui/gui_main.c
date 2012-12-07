@@ -31,6 +31,7 @@ struct s_gui_data
   config_args *args;
   monconf *conf;
   GtkWidget *windowMain;
+  GtkWidget *windowEntry;
   GtkWidget *windowConfig;
   
   GtkAction *action_mainExit;
@@ -48,7 +49,6 @@ struct s_gui_data
   GtkListStore *listStoreEntries;
   
   GtkTreeView *treeviewEntries;
-  int active;
 };
 
 void populate_config(struct s_gui_data *gui_data);
@@ -60,7 +60,7 @@ void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
   if(gui_data->lstart.active)
   {
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
-			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);
+            &(gui_data->lthread), &(gui_data->lstart), &lstop_status);
   }
   gtk_main_quit();
 }
@@ -101,25 +101,33 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   if(gui_data->lstart.active)
   {
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
-			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
+            &(gui_data->lthread), &(gui_data->lstart), &lstop_status);            
     on_reactlist_stop(gui_data);
   }
   else 
   {   
     start_reactor_and_listener(gui_data->conf,&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
-			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
+            &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
     on_reactlist_start(gui_data);
   }
 }
 
+void show_config_window(struct s_gui_data *gui_data, int action_type)
+{
+  gtk_widget_show(gui_data->windowEntry);
+}
+
+
 void on_action_entryAdd_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  show_config_window(gui_data, EDIT_ACTION_ADD);
 }
 
 void on_action_entryModify_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  show_config_window(gui_data, EDIT_ACTION_MODIFY);
 }
 
 void on_action_entryDelete_activate(GtkAction *action, gpointer user_data)
@@ -153,7 +161,6 @@ int main (int argc, char *argv[])
 {
   struct s_gui_data data;  
   config_args args;
-  data.active = 1;
   args.config_path = NULL;
   monconf_parse_cli_args(&args, argc, argv);  
     
@@ -170,8 +177,9 @@ int main (int argc, char *argv[])
   builder = gtk_builder_new ();
   gtk_builder_add_from_file (builder, "ui-glade/monarqui_gui.glade", NULL);  
   
-  data.windowMain = (GtkWidget *)GTK_WIDGET(gtk_builder_get_object (builder, "windowMain"));
-  data.windowConfig = (GtkWidget *)GTK_WIDGET(gtk_builder_get_object (builder, "windowConfig"));
+  data.windowMain = GTK_WIDGET(gtk_builder_get_object (builder, "windowMain"));
+  data.windowEntry = GTK_WIDGET(gtk_builder_get_object (builder, "windowEntry"));
+  data.windowConfig = GTK_WIDGET(gtk_builder_get_object (builder, "windowConfig"));
   data.action_mainExit = GTK_ACTION(gtk_builder_get_object(builder, "action_mainExit"));
   data.action_configOpen = GTK_ACTION(gtk_builder_get_object(builder, "action_configOpen"));
   data.action_configClose = GTK_ACTION(gtk_builder_get_object(builder, "action_configClose"));
@@ -225,17 +233,17 @@ void populate_config(struct s_gui_data *gui_data)
     monconf_entry *entry = (monconf_entry *)item->data;
     gtk_list_store_append(gui_data->listStoreEntries, &iter);
     gtk_list_store_set(gui_data->listStoreEntries,&iter,
-		       COL_ENTRY_PATH, entry->file_name,
-		       COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
-		       COL_ENTRY_EVENT_CREATE, (gboolean)(entry->events & MON_CREATE),
-		       COL_ENTRY_EVENT_MODIFY, (gboolean)(entry->events & MON_MODIFY),
-		       COL_ENTRY_EVENT_DELETE, (gboolean)(entry->events & MON_DELETE),
-		       COL_ENTRY_EVENT_ATTRIBS, (gboolean)(entry->events & MON_ATTRIB),
-		       COL_ENTRY_EVENT_MOVED_FROM, (gboolean)(entry->events & MON_MOVED_FROM),
-		       COL_ENTRY_EVENT_MOVED_TO, (gboolean)(entry->events & MON_MOVED_TO),
-		       COL_ENTRY_IGNORE, g_strdup_printf("%d",entry->events),		       
-		       -1
-		      );
+           COL_ENTRY_PATH, entry->file_name,
+           COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
+           COL_ENTRY_EVENT_CREATE, (gboolean)(entry->events & MON_CREATE),
+           COL_ENTRY_EVENT_MODIFY, (gboolean)(entry->events & MON_MODIFY),
+           COL_ENTRY_EVENT_DELETE, (gboolean)(entry->events & MON_DELETE),
+           COL_ENTRY_EVENT_ATTRIBS, (gboolean)(entry->events & MON_ATTRIB),
+           COL_ENTRY_EVENT_MOVED_FROM, (gboolean)(entry->events & MON_MOVED_FROM),
+           COL_ENTRY_EVENT_MOVED_TO, (gboolean)(entry->events & MON_MOVED_TO),
+           COL_ENTRY_IGNORE, string_join(entry->ignore_files),           
+           -1
+          );
   
     item = item->next;
   }

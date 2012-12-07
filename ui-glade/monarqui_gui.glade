@@ -9,9 +9,10 @@
     <signal name="activate" handler="on_action_configOpen_activate"/>
   </object>
   <object class="GtkAction" id="action_mainExit">
-    <property name="label">Exitj</property>
+    <property name="label">Exit</property>
     <property name="stock_id">gtk-quit</property>
     <property name="icon_name">application-exit</property>
+    <property name="always_show_image">True</property>
     <signal name="activate" handler="on_action_mainExit_activate"/>
   </object>
   <object class="GtkAction" id="action_startPause">
@@ -67,6 +68,38 @@
       </row>
     </data>
   </object>
+  <object class="GtkListStore" id="listStoreEntryActions">
+    <columns>
+      <!-- column-name action_name -->
+      <column type="gchararray"/>
+      <!-- column-name globs -->
+      <column type="gchararray"/>
+      <!-- column-name event_create -->
+      <column type="gboolean"/>
+      <!-- column-name event_modify -->
+      <column type="gboolean"/>
+      <!-- column-name event_delete -->
+      <column type="gboolean"/>
+      <!-- column-name event_attrib -->
+      <column type="gboolean"/>
+      <!-- column-name event_moved_from -->
+      <column type="gboolean"/>
+      <!-- column-name event_moved_to -->
+      <column type="gboolean"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">test</col>
+        <col id="1" translatable="yes">tet</col>
+        <col id="2">True</col>
+        <col id="3">True</col>
+        <col id="4">True</col>
+        <col id="5">True</col>
+        <col id="6">False</col>
+        <col id="7">False</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="windowMain">
     <property name="title" translatable="yes">Monarqui 0.1.3 - Main</property>
     <property name="window_position">center</property>
@@ -83,13 +116,14 @@
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="menuArquivo">
+                  <object class="GtkMenu" id="menuFile">
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">action_mainExit</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -110,8 +144,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryAdd</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -123,8 +157,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryModify</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
@@ -136,8 +170,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryDelete">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryDelete</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Modify</property>
                 <property name="use_underline">True</property>
               </object>
@@ -162,8 +196,8 @@
             <child>
               <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_saveConfig</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -225,6 +259,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle2"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="active">2</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -236,6 +271,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle3"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="active">3</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -247,6 +283,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle4"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="active">4</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -258,6 +295,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle5"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="active">5</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -269,6 +307,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle6"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="radio">6</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -280,6 +319,7 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle7"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="radio">7</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -291,6 +331,7 @@
                       <object class="GtkCellRendererText" id="cellrenderertext2"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
+                        <attribute name="text">8</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -342,14 +383,289 @@
     <signal name="activate" handler="on_action_saveConfig_activate"/>
   </object>
   <object class="GtkWindow" id="windowEntry">
+    <property name="title" translatable="yes">Monarqui 0.1 - Entry</property>
+    <property name="modal">True</property>
     <child>
       <object class="GtkVBox" id="vbox3">
         <property name="visible">True</property>
+        <property name="border_width">4</property>
         <child>
-          <placeholder/>
+          <object class="GtkVBox" id="vbox2">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkHBox" id="hbox1">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Path:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">5</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFileChooserButton" id="filechooserPath">
+                    <property name="visible">True</property>
+                    <property name="action">select-folder</property>
+                    <property name="title" translatable="yes">Select a folder</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="checkboxRecursive">
+                <property name="label" translatable="yes">Watch folders recursively</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox4">
+                <property name="visible">True</property>
+                <property name="spacing">3</property>
+                <child>
+                  <object class="GtkLabel" id="labelEvents">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">Events</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="checkboxOnCreate">
+                    <property name="label" translatable="yes">On Create</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="checkboxOnModify">
+                <property name="label" translatable="yes">On Modify</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="checkboxOnDelete">
+                <property name="label" translatable="yes">On Delete</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="checkboxOnMovedFrom">
+                <property name="label" translatable="yes">On Move/Rename From</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="checkboxOnMovedTo">
+                <property name="label" translatable="yes">On Move/Rename To</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="labelActions">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Associated Actions</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="position">7</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkTreeView" id="treeviewEntryActions">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="model">listStoreEntryActions</property>
+            <property name="enable_grid_lines">horizontal</property>
+            <child>
+              <object class="GtkTreeViewColumn" id="Action">
+                <property name="title">Action</property>
+                <child>
+                  <object class="GtkCellRendererSpin" id="cellrendererspin1"/>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="globs">
+                <property name="title">Globs</property>
+                <child>
+                  <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                  <attributes>
+                    <attribute name="text">1</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn9">
+                <property name="title">Create</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle8"/>
+                  <attributes>
+                    <attribute name="active">2</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn10">
+                <property name="title">Modify</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle9"/>
+                  <attributes>
+                    <attribute name="active">3</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn11">
+                <property name="title">Delete</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle10"/>
+                  <attributes>
+                    <attribute name="radio">4</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn12">
+                <property name="title">Attribs</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle11"/>
+                  <attributes>
+                    <attribute name="active">5</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn13">
+                <property name="title">Move From</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle12"/>
+                  <attributes>
+                    <attribute name="active">6</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn14">
+                <property name="title">Move To</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle13"/>
+                  <attributes>
+                    <attribute name="active">7</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHButtonBox" id="hbuttonbox1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton" id="buttonSave">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">action_entrySave</property>
+                <property name="use_action_appearance">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonClose">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">action_entryClose</property>
+                <property name="use_action_appearance">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
         </child>
       </object>
     </child>
@@ -369,5 +685,12 @@
   <object class="GtkImage" id="image_startStop1">
     <property name="visible">True</property>
     <property name="icon_name">gtk-media-play-ltr</property>
+  </object>
+  <object class="GtkAction" id="action_entrySave">
+    <property name="label">Save</property>
+    <property name="icon_name">security-high</property>
+  </object>
+  <object class="GtkAction" id="action_entryClose">
+    <property name="label">Close</property>
   </object>
 </interface>
