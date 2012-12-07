@@ -36,7 +36,11 @@ struct s_gui_data
   GtkAction *action_mainExit;
   GtkAction *action_configOpen;
   GtkAction *action_configClose;
-  GtkAction *action_startPause;
+  GtkAction *action_startPause;  
+  GtkAction *action_entryAdd;  
+  GtkAction *action_entryModify;  
+  GtkAction *action_entryDelete;  
+  GtkAction *action_saveConfig;  
   
   GtkImage *image_startStop;
   
@@ -44,6 +48,7 @@ struct s_gui_data
   GtkListStore *listStoreEntries;
   
   GtkTreeView *treeviewEntries;
+  int active;
 };
 
 void populate_config(struct s_gui_data *gui_data);
@@ -74,7 +79,7 @@ void on_action_configClose_activate(GtkAction *action, gpointer user_data)
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
 {
-
+  gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
 }
 
 void on_reactlist_stop(struct s_gui_data *gui_data) 
@@ -97,17 +102,34 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
   {
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstop_status);			      
-    monconf_free(gui_data->rstart.conf);
     on_reactlist_stop(gui_data);
   }
   else 
   {   
-    monconf *conf = monconf_create();
-    monconf_read_config(conf, gui_data->args->config_path);
-    start_reactor_and_listener(conf,&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
+    start_reactor_and_listener(gui_data->conf,&(gui_data->rthread), &(gui_data->rstart), &rstatus, 
 			      &(gui_data->lthread), &(gui_data->lstart), &lstatus);  
     on_reactlist_start(gui_data);
   }
+}
+
+void on_action_entryAdd_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+}
+
+void on_action_entryModify_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+}
+
+void on_action_entryDelete_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+}
+
+void on_action_saveConfig_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
 }
 
 void on_windowMain_destroy (GtkObject *object, gpointer user_data)
@@ -127,24 +149,11 @@ void on_btnStartPause_clicked(GtkObject *object, gpointer user_data)
 }
 
 
-void on_systray_clicked(GtkStatusIcon *status_icon, gpointer user_data)
-{
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  if(gtk_window_is_active((GtkWindow *)gui_data->windowMain))
-    gtk_window_iconify((GtkWindow *)gui_data->windowMain);
-  else
-    gtk_window_deiconify((GtkWindow *)gui_data->windowMain);  
-}
-
-void create_config_dir()
-{
-
-}
-
 int main (int argc, char *argv[])
 {
   struct s_gui_data data;  
   config_args args;
+  data.active = 1;
   args.config_path = NULL;
   monconf_parse_cli_args(&args, argc, argv);  
     
@@ -166,7 +175,11 @@ int main (int argc, char *argv[])
   data.action_mainExit = GTK_ACTION(gtk_builder_get_object(builder, "action_mainExit"));
   data.action_configOpen = GTK_ACTION(gtk_builder_get_object(builder, "action_configOpen"));
   data.action_configClose = GTK_ACTION(gtk_builder_get_object(builder, "action_configClose"));
-  data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));  
+  data.action_startPause = GTK_ACTION(gtk_builder_get_object(builder, "action_startPause"));
+  data.action_entryAdd = GTK_ACTION(gtk_builder_get_object(builder, "action_entryAdd"));
+  data.action_entryModify = GTK_ACTION(gtk_builder_get_object(builder, "action_entryModify"));
+  data.action_entryDelete = GTK_ACTION(gtk_builder_get_object(builder, "action_entryDelete"));  
+  data.action_saveConfig = GTK_ACTION(gtk_builder_get_object(builder, "action_saveConfig"));  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(builder,"image_startStop"));  
   data.args = &args;
   data.conf = conf;
@@ -185,8 +198,6 @@ int main (int argc, char *argv[])
   gtk_widget_show (data.windowMain);                
   gtk_main ();
   
-  monconf_free(conf);
-  monconf_free_cli_args(&args);
   return 0;
 }
 

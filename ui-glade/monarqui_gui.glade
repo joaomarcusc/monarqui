@@ -9,7 +9,9 @@
     <signal name="activate" handler="on_action_configOpen_activate"/>
   </object>
   <object class="GtkAction" id="action_mainExit">
+    <property name="label">Exitj</property>
     <property name="stock_id">gtk-quit</property>
+    <property name="icon_name">application-exit</property>
     <signal name="activate" handler="on_action_mainExit_activate"/>
   </object>
   <object class="GtkAction" id="action_startPause">
@@ -78,16 +80,16 @@
             <child>
               <object class="GtkMenuItem" id="menuitem1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_Arquivo</property>
+                <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menuArquivo">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="&amp;_Sair">
+                      <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="related_action">action_mainExit</property>
-                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -106,6 +108,45 @@
             <property name="visible">True</property>
             <property name="icon_size">8</property>
             <child>
+              <object class="GtkToolButton" id="btnEntryAdd">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryAdd</property>
+                <property name="label" translatable="yes">startStop</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnEntryModify">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryModify</property>
+                <property name="label" translatable="yes">Add</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnEntryDelete">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryDelete</property>
+                <property name="label" translatable="yes">Modify</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="btnStart">
                 <property name="visible">True</property>
                 <property name="related_action">action_startPause</property>
@@ -119,10 +160,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnStop">
+              <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainExit</property>
-                <property name="label" translatable="yes">quit</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">action_saveConfig</property>
+                <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -145,6 +187,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">listStoreEntries</property>
+                <property name="headers_clickable">False</property>
+                <property name="search_column">0</property>
                 <property name="enable_grid_lines">both</property>
                 <property name="enable_tree_lines">True</property>
                 <child>
@@ -269,5 +313,61 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAction" id="action_entryAdd">
+    <property name="label">Add</property>
+    <property name="stock_id">list-add</property>
+    <property name="icon_name">list-add</property>
+    <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_action_entryAdd_activate"/>
+  </object>
+  <object class="GtkAction" id="action_entryModify">
+    <property name="label">Modify</property>
+    <property name="stock_id">insert-text</property>
+    <property name="icon_name">applications-system</property>
+    <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_action_entryModify_activate"/>
+  </object>
+  <object class="GtkAction" id="action_entryDelete">
+    <property name="label">Delete</property>
+    <property name="stock_id">list-remove</property>
+    <property name="icon_name">list-remove</property>
+    <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_action_entryDelete_activate"/>
+  </object>
+  <object class="GtkAction" id="action_saveConfig">
+    <property name="stock_id">gtk-save</property>
+    <property name="icon_name">document-save</property>
+    <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_action_saveConfig_activate"/>
+  </object>
+  <object class="GtkWindow" id="windowEntry">
+    <child>
+      <object class="GtkVBox" id="vbox3">
+        <property name="visible">True</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="image_add">
+    <property name="visible">True</property>
+    <property name="icon_name">list-add</property>
+  </object>
+  <object class="GtkImage" id="image_modify">
+    <property name="visible">True</property>
+    <property name="icon_name">insert-text</property>
+  </object>
+  <object class="GtkImage" id="image_delete">
+    <property name="visible">True</property>
+    <property name="icon_name">list-remove</property>
+  </object>
+  <object class="GtkImage" id="image_startStop1">
+    <property name="visible">True</property>
+    <property name="icon_name">gtk-media-play-ltr</property>
   </object>
 </interface>
