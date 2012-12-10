@@ -121,8 +121,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
-                        <property name="related_action">action_mainExit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">action_mainExit</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -144,8 +144,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
                 <property name="visible">True</property>
-                <property name="related_action">action_entryAdd</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryAdd</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -157,8 +157,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="related_action">action_entryModify</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryModify</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
@@ -170,8 +170,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryDelete">
                 <property name="visible">True</property>
-                <property name="related_action">action_entryDelete</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryDelete</property>
                 <property name="label" translatable="yes">Modify</property>
                 <property name="use_underline">True</property>
               </object>
@@ -196,8 +196,8 @@
             <child>
               <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="related_action">action_saveConfig</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_saveConfig</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -217,7 +217,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkTreeView" id="treeview2">
+              <object class="GtkTreeView" id="treeviewEntries">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">listStoreEntries</property>
@@ -385,6 +385,7 @@
   <object class="GtkWindow" id="windowEntry">
     <property name="title" translatable="yes">Monarqui 0.1 - Entry</property>
     <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <child>
       <object class="GtkVBox" id="vbox3">
         <property name="visible">True</property>
@@ -480,6 +481,18 @@
               </packing>
             </child>
             <child>
+              <object class="GtkCheckButton" id="checkboxOnAttrib">
+                <property name="label" translatable="yes">On Attributes Changed</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkCheckButton" id="checkboxOnDelete">
                 <property name="label" translatable="yes">On Delete</property>
                 <property name="visible">True</property>
@@ -488,7 +501,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -500,7 +513,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -512,7 +525,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -525,7 +538,7 @@
                 </attributes>
               </object>
               <packing>
-                <property name="position">7</property>
+                <property name="position">8</property>
               </packing>
             </child>
           </object>
@@ -638,8 +651,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_entrySave</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entrySave</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -652,8 +665,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_entryClose</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryClose</property>
               </object>
               <packing>
                 <property name="expand">False</property>

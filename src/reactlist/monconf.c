@@ -533,3 +533,15 @@ void monconf_find_config(config_args*args)
     free(config_file_path);
   }    
 }
+
+monconf_entry *monconf_entry_get_by_path(monconf *conf, char *path)
+{
+  GList *item = g_list_first(conf->entrylist);
+  while(item)
+  {
+    if(!strcmp(((monconf_entry *)item->data)->file_name,path))
+      return (monconf_entry *)item->data;
+    item = item->next;
+  }
+  return NULL;
+}
