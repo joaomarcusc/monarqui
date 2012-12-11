@@ -2,12 +2,6 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkAction" id="action_configClose">
-    <signal name="activate" handler="on_action_configClose_activate"/>
-  </object>
-  <object class="GtkAction" id="action_configOpen">
-    <signal name="activate" handler="on_action_configOpen_activate"/>
-  </object>
   <object class="GtkAction" id="action_mainExit">
     <property name="label">Exit</property>
     <property name="stock_id">gtk-quit</property>
@@ -702,8 +696,10 @@
   <object class="GtkAction" id="action_entrySave">
     <property name="label">Save</property>
     <property name="icon_name">security-high</property>
+    <signal name="activate" handler="on_action_entrySave_activate"/>
   </object>
   <object class="GtkAction" id="action_entryClose">
     <property name="label">Close</property>
+    <signal name="activate" handler="on_action_entryClose_activate"/>
   </object>
 </interface>

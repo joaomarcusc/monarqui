@@ -50,6 +50,12 @@ monconf_action_entry *monconf_entry_new_action(monconf_entry *conf_entry)
   return action_entry;
 }
 
+void monconf_remove_entry(monconf *conf, monconf_entry *entry)
+{
+  conf->entrylist = g_list_remove(g_list_first(conf->entrylist),entry);
+  monconf_free_entry(entry);
+}
+
 void monconf_read_config(monconf *conf,const char *cfg_file)
 {  
   monconf_entry *entry;

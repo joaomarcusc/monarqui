@@ -80,16 +80,15 @@ void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
   gtk_main_quit();
 }
 
-void on_action_configOpen_activate(GtkAction *action, gpointer user_data)
+void on_action_entrySave_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  gtk_widget_show(gui_data->windowConfig);
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
 }
 
-void on_action_configClose_activate(GtkAction *action, gpointer user_data)
+void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  gtk_widget_destroy(gui_data->windowConfig);
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  gtk_widget_hide(gui_data->windowEntry);  
 }
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
@@ -128,20 +127,40 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
 }
 void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf_entry *entry)
 {
-  gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), path);
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), entry->recursive);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
-				entry->events & MON_CREATE);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnModify"))->toggle_button), 
-				entry->events & MON_MODIFY);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnDelete"))->toggle_button), 
-				entry->events & MON_DELETE);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnAttrib"))->toggle_button), 
-				entry->events & MON_ATTRIB);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedFrom"))->toggle_button), 
-				entry->events & MON_MOVED_FROM);	
-  gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
-				entry->events & MON_MOVED_TO);	
+  if(path && entry)
+  {
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), path);
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), entry->recursive);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
+				  entry->events & MON_CREATE);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnModify"))->toggle_button), 
+				  entry->events & MON_MODIFY);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnDelete"))->toggle_button), 
+				  entry->events & MON_DELETE);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnAttrib"))->toggle_button), 
+				  entry->events & MON_ATTRIB);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedFrom"))->toggle_button), 
+				  entry->events & MON_MOVED_FROM);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
+				  entry->events & MON_MOVED_TO);	
+  } 
+  else
+  {
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), NULL);
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), 0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
+				  0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnModify"))->toggle_button), 
+				  0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnDelete"))->toggle_button), 
+				  0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnAttrib"))->toggle_button), 
+				  0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedFrom"))->toggle_button), 
+				  0);	
+    gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
+				  0);	
+  }
 }
 
 void show_config_window(struct s_gui_data *gui_data, int action_type)
@@ -149,9 +168,12 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
   GtkTreeSelection *selection;
   GtkTreeModel     *model;
   GtkTreeIter       iter;  
+  char show_window = 0;
   switch(action_type)
   {
     case EDIT_ACTION_ADD:            
+      show_window = 1;
+      populate_entry_config(gui_data,NULL,NULL);
       break;
     case EDIT_ACTION_MODIFY:    
       selection = gtk_tree_view_get_selection(gui_data->treeviewEntries);
@@ -162,14 +184,12 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
         monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
 	populate_entry_config(gui_data, path, entry);
 	g_free(path);
+	show_window = 1;
       }
-      else
-      {
-	g_print ("no row selected.\n");
-      }      
       break;
   }
-  gtk_widget_show(gui_data->windowEntry);
+  if(show_window) 
+    gtk_widget_show(gui_data->windowEntry);
 }
 
 
@@ -188,6 +208,31 @@ void on_action_entryModify_activate(GtkAction *action, gpointer user_data)
 void on_action_entryDelete_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  GtkTreeSelection *selection;
+  GtkTreeModel     *model;
+  GtkTreeIter       iter;  
+  selection = gtk_tree_view_get_selection(gui_data->treeviewEntries);
+  if (gtk_tree_selection_get_selected(selection, &model, &iter))
+  {
+    gchar *path;    
+    gtk_tree_model_get (model, &iter, COL_ENTRY_PATH, &path, -1);
+    monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
+    
+    GtkWidget *dialog;    
+    dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowEntry),
+	      GTK_DIALOG_DESTROY_WITH_PARENT,
+	      GTK_MESSAGE_QUESTION,
+	      GTK_BUTTONS_YES_NO,
+	      "Remove the entry '%s'?",path);
+    gtk_window_set_title(GTK_WINDOW(dialog), "Remove Entry");
+    if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_YES)
+    {
+      monconf_remove_entry(gui_data->conf, entry);
+      populate_config(gui_data);
+    }
+    gtk_widget_destroy(dialog);      
+    g_free(path);
+  }
 }
 
 void on_action_saveConfig_activate(GtkAction *action, gpointer user_data)
@@ -201,16 +246,9 @@ void on_windowMain_destroy (GtkObject *object, gpointer user_data)
   gtk_action_activate(gui_data->action_mainExit);
 }
 
-void on_windowConfig_destroy (GtkObject *object, gpointer user_data)
-{   
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  gtk_action_activate(gui_data->action_configClose);
-}
-
 void on_btnStartPause_clicked(GtkObject *object, gpointer user_data)
 {
 }
-
 
 int main (int argc, char *argv[])
 {  
@@ -291,3 +329,6 @@ void populate_config(struct s_gui_data *gui_data)
     item = item->next;
   }
 }
+
+
+
