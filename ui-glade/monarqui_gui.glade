@@ -242,7 +242,6 @@
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle1"/>
                       <attributes>
                         <attribute name="visible">1</attribute>
-                        <attribute name="activatable">1</attribute>
                         <attribute name="active">1</attribute>
                       </attributes>
                     </child>
@@ -382,6 +381,7 @@
     <property name="title" translatable="yes">Monarqui 0.1 - Entry</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
+    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child>
       <object class="GtkVBox" id="vbox3">
         <property name="visible">True</property>
@@ -565,6 +565,9 @@
                 <property name="title">Action</property>
                 <child>
                   <object class="GtkCellRendererSpin" id="cellrendererspin1"/>
+                  <attributes>
+                    <attribute name="text">1</attribute>
+                  </attributes>
                 </child>
               </object>
             </child>
@@ -574,7 +577,7 @@
                 <child>
                   <object class="GtkCellRendererText" id="cellrenderertext3"/>
                   <attributes>
-                    <attribute name="text">1</attribute>
+                    <attribute name="text">2</attribute>
                   </attributes>
                 </child>
               </object>
@@ -585,7 +588,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle8"/>
                   <attributes>
-                    <attribute name="active">2</attribute>
+                    <attribute name="active">3</attribute>
                   </attributes>
                 </child>
               </object>
@@ -596,7 +599,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle9"/>
                   <attributes>
-                    <attribute name="active">3</attribute>
+                    <attribute name="active">4</attribute>
                   </attributes>
                 </child>
               </object>
@@ -607,7 +610,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle10"/>
                   <attributes>
-                    <attribute name="radio">4</attribute>
+                    <attribute name="active">5</attribute>
                   </attributes>
                 </child>
               </object>
@@ -618,7 +621,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle11"/>
                   <attributes>
-                    <attribute name="active">5</attribute>
+                    <attribute name="active">6</attribute>
                   </attributes>
                 </child>
               </object>
@@ -629,7 +632,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle12"/>
                   <attributes>
-                    <attribute name="active">6</attribute>
+                    <attribute name="active">7</attribute>
                   </attributes>
                 </child>
               </object>
@@ -640,7 +643,7 @@
                 <child>
                   <object class="GtkCellRendererToggle" id="cellrenderertoggle13"/>
                   <attributes>
-                    <attribute name="active">7</attribute>
+                    <attribute name="active">8</attribute>
                   </attributes>
                 </child>
               </object>

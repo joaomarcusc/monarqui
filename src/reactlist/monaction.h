@@ -5,7 +5,7 @@
 
 typedef struct s_monaction_entry
 {
-  char name[64];  
+  char *name;  
   short type;   
   char *script;   
   lua_State *luaState;

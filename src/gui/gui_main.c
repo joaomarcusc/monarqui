@@ -81,6 +81,7 @@ enum
 };
 
 void populate_config(struct s_gui_data *gui_data);
+void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_entry);
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 {
@@ -157,6 +158,7 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf
 				  entry->events & MON_MOVED_FROM);	
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
 				  entry->events & MON_MOVED_TO);	
+    populate_entry_actions(gui_data, entry);
   } 
   else
   {
@@ -174,7 +176,9 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf
 				  0);	
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
 				  0);	
+    populate_entry_actions(gui_data, NULL);
   }
+  
 }
 
 void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_entry)
@@ -184,29 +188,36 @@ void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_ent
   monaction_entry *action_entry = NULL;
   monconf_action_entry *conf_action_entry = NULL;
   gtk_list_store_clear(gui_data->listStoreEntryActions);
-  GList *action_keys = g_hash_table_get_keys(gui_data->conf->actionMap);
+  GList *action_keys = g_hash_table_get_values(gui_data->conf->actionMap);
   GList *item = g_list_first(action_keys);
+  char *str_globs;
+  
   while(item)
   {
     action_entry = (monaction_entry *)item->data;
+    str_globs = NULL;
     if(conf_entry != NULL) 
     {
-      conf_action_entry = monconf_action_entry_get_by_name(conf_entry, action_entry->name);
+      conf_action_entry = monconf_action_entry_get_by_name(conf_entry, action_entry->name);    
+      if(conf_action_entry != NULL)
+	str_globs = string_join(conf_action_entry->globs);
     }
+    
     gtk_list_store_append(gui_data->listStoreEntryActions, &iter);
     gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
-           COL_ACTION_ENTRY_ENABLED, conf_action_entry != NULL,
-	   COL_ACTION_ENTRY_NAME, action_entry->name,
+           COL_ACTION_ENTRY_ENABLED, (gboolean)(conf_action_entry != NULL),       
+	   COL_ACTION_ENTRY_NAME, action_entry->name,		       
            COL_ACTION_ENTRY_GLOBS, (conf_action_entry != NULL ? string_join(conf_action_entry->globs) : ""),           
-           COL_ACTION_ENTRY_CREATE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_CREATE) : 0),
-           COL_ACTION_ENTRY_MODIFY, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MODIFY) : 0),
-           COL_ACTION_ENTRY_DELETE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_DELETE) : 0),
-           COL_ACTION_ENTRY_ATTRIBS, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_ATTRIB) : 0),
-           COL_ACTION_ENTRY_MOVED_FROM, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_FROM) : 0),
-           COL_ACTION_ENTRY_MOVED_TO, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_TO) : 0),           
+           COL_ACTION_ENTRY_CREATE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_CREATE) : (gboolean)0),
+           COL_ACTION_ENTRY_MODIFY, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MODIFY) : (gboolean)0),
+           COL_ACTION_ENTRY_DELETE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_DELETE) : (gboolean)0),
+           COL_ACTION_ENTRY_ATTRIBS, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_ATTRIB) : (gboolean)0),
+           COL_ACTION_ENTRY_MOVED_FROM, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_FROM) : (gboolean)0),
+           COL_ACTION_ENTRY_MOVED_TO, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_TO) : (gboolean)0),           		      
            -1
           );
-  
+    if(str_globs)
+      free(str_globs);
     item = item->next;
   }  
   g_list_free(action_keys);
@@ -329,7 +340,7 @@ int main (int argc, char *argv[])
   data.action_startPause = GTK_ACTION(gtk_builder_get_object(data.builder, "action_startPause"));
   data.action_entryAdd = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryAdd"));
   data.action_entryModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryModify"));
-  data.action_entryDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryDelete"));  
+  data.action_entryDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryDelete"));
   data.action_saveConfig = GTK_ACTION(gtk_builder_get_object(data.builder, "action_saveConfig"));  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(data.builder,"image_startStop"));  
   data.args = &args;

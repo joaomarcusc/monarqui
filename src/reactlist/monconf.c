@@ -97,7 +97,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
       if(currNode->type == XML_ELEMENT_NODE)
       {	
 	if(!strcmp(currNode->name,"name"))
-	  strncpy(action_tmp.name, currNode->children->content, 64); 	  
+	  action_tmp.name = g_strdup(currNode->children->content);
 	else if(!strcmp(currNode->name,"script"))
 	  action_tmp.script = currNode->children->content;
 	else if(!strcmp(currNode->name,"type")) 
@@ -115,6 +115,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
     action_entry = monconf_new_action(conf, action_tmp.name);
     action_entry->type = action_tmp.type;
     action_entry->script = g_strdup(action_tmp.script);  
+    g_free(action_tmp.name);
     monaction_init_state(action_entry);
   }
   xmlXPathFreeObject(xobj);  
@@ -163,7 +164,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 		  if(!strcmp(actionChildren->name,"name"))
 		    conf_action->action = (monaction_entry*)g_hash_table_lookup(conf->actionMap, actionChildren->children->content);
 		  if(!strcmp(actionChildren->name,"events"))
-		    conf_action->events = str_events_to_int(actionNode->children->content);
+		    conf_action->events = str_events_to_int(actionChildren->children->content);
 		  else if(!strcmp(actionChildren->name,"filter_glob")) 
 		  {
 		    if(actionChildren->children) 
@@ -223,6 +224,7 @@ void monaction_free_entry(monaction_entry *action)
 {  
   if(action->luaState)
     lua_close(action->luaState);
+  g_free(action->name);
   g_free(action->script);
   g_free(action);
 }
@@ -290,7 +292,7 @@ void monconf_foreach(monconf *conf, GFunc func, gpointer user_data)
 monaction_entry *monconf_new_action(monconf *conf, const char *str_name) 
 {
   monaction_entry *entry = malloc(sizeof(monaction_entry));
-  strncpy(entry->name, str_name, 64);  
+  entry->name = g_strdup(str_name);  
   g_hash_table_insert(conf->actionMap,entry->name,entry);
   return entry;
 }
