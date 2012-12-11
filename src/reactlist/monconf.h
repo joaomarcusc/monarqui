@@ -46,6 +46,7 @@ typedef struct s_config_args
 monconf *monconf_create();
 void monconf_read_config(monconf *conf,const char *cfg_file);
 void monconf_remove_entry(monconf *conf, monconf_entry *entry);
+monconf_action_entry *monconf_action_entry_get_by_name(monconf_entry *entry, const char *action_name);
 void monconf_free(monconf *conf);
 void monconf_free_entry(monconf_entry *entry);
 void monconf_free_entry_gfunc(gpointer data, gpointer user_data);

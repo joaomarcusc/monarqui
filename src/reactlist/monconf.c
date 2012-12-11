@@ -244,6 +244,18 @@ void monconf_free_action_entry(monconf_action_entry *action)
   g_free(action);  
 }
 
+monconf_action_entry *monconf_action_entry_get_by_name(monconf_entry *entry, const char *action_name)
+{
+  GList *item = g_list_first(entry->actions);
+  while(item)
+  {
+    if(!strcmp(((monconf_action_entry *)item->data)->action->name,action_name))
+      return (monconf_action_entry *)item->data;
+    item = item->next;
+  }
+  return NULL;
+}
+
 void monconf_free_action_entry_gfunc(gpointer data, gpointer user_data) 
 {
   monconf_free_action_entry((monconf_action_entry *) data);

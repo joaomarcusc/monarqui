@@ -47,6 +47,7 @@ struct s_gui_data
   
   GtkListStore *listStoreActions;
   GtkListStore *listStoreEntries;
+  GtkListStore *listStoreEntryActions;
   
   GtkTreeView *treeviewEntries;
   
@@ -64,6 +65,19 @@ enum
   COL_ENTRY_EVENT_MOVED_FROM,
   COL_ENTRY_EVENT_MOVED_TO,    
   COL_ENTRY_IGNORE
+};
+
+enum
+{
+  COL_ACTION_ENTRY_ENABLED = 0,
+  COL_ACTION_ENTRY_NAME,
+  COL_ACTION_ENTRY_GLOBS,
+  COL_ACTION_ENTRY_CREATE,
+  COL_ACTION_ENTRY_MODIFY,
+  COL_ACTION_ENTRY_DELETE,
+  COL_ACTION_ENTRY_ATTRIBS,
+  COL_ACTION_ENTRY_MOVED_FROM,
+  COL_ACTION_ENTRY_MOVED_TO
 };
 
 void populate_config(struct s_gui_data *gui_data);
@@ -163,12 +177,47 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf
   }
 }
 
+void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_entry)
+{
+  GtkTreeModel *modelEntries;  
+  GtkTreeIter iter;
+  monaction_entry *action_entry = NULL;
+  monconf_action_entry *conf_action_entry = NULL;
+  gtk_list_store_clear(gui_data->listStoreEntryActions);
+  GList *action_keys = g_hash_table_get_keys(gui_data->conf->actionMap);
+  GList *item = g_list_first(action_keys);
+  while(item)
+  {
+    action_entry = (monaction_entry *)item->data;
+    if(conf_entry != NULL) 
+    {
+      conf_action_entry = monconf_action_entry_get_by_name(conf_entry, action_entry->name);
+    }
+    gtk_list_store_append(gui_data->listStoreEntryActions, &iter);
+    gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
+           COL_ACTION_ENTRY_ENABLED, conf_action_entry != NULL,
+	   COL_ACTION_ENTRY_NAME, action_entry->name,
+           COL_ACTION_ENTRY_GLOBS, (conf_action_entry != NULL ? string_join(conf_action_entry->globs) : ""),           
+           COL_ACTION_ENTRY_CREATE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_CREATE) : 0),
+           COL_ACTION_ENTRY_MODIFY, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MODIFY) : 0),
+           COL_ACTION_ENTRY_DELETE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_DELETE) : 0),
+           COL_ACTION_ENTRY_ATTRIBS, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_ATTRIB) : 0),
+           COL_ACTION_ENTRY_MOVED_FROM, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_FROM) : 0),
+           COL_ACTION_ENTRY_MOVED_TO, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MOVED_TO) : 0),           
+           -1
+          );
+  
+    item = item->next;
+  }  
+  g_list_free(action_keys);
+}
+
 void show_config_window(struct s_gui_data *gui_data, int action_type)
 {
   GtkTreeSelection *selection;
   GtkTreeModel     *model;
   GtkTreeIter       iter;  
-  char show_window = 0;
+  char show_window = 0;  
   switch(action_type)
   {
     case EDIT_ACTION_ADD:            
@@ -287,7 +336,8 @@ int main (int argc, char *argv[])
   data.conf = conf;
   data.treeviewEntries = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewEntries"));
   data.listStoreActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreActions"));  
-  data.listStoreEntries = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntries"));  
+  data.listStoreEntries = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntries"));
+  data.listStoreEntryActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntryActions"));  
   
   gtk_builder_connect_signals (data.builder, (gpointer)&data);  
   

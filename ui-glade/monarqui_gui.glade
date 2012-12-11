@@ -64,6 +64,8 @@
   </object>
   <object class="GtkListStore" id="listStoreEntryActions">
     <columns>
+      <!-- column-name enabled -->
+      <column type="gboolean"/>
       <!-- column-name action_name -->
       <column type="gchararray"/>
       <!-- column-name globs -->
@@ -83,7 +85,7 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">test</col>
+        <col id="0" translatable="yes">False</col>
         <col id="1" translatable="yes">tet</col>
         <col id="2">True</col>
         <col id="3">True</col>
@@ -115,8 +117,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">action_mainExit</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -138,8 +140,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryAdd</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -151,8 +153,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryModify</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
@@ -164,8 +166,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryDelete">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryDelete</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Modify</property>
                 <property name="use_underline">True</property>
               </object>
@@ -190,8 +192,8 @@
             <child>
               <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_saveConfig</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -548,6 +550,17 @@
             <property name="model">listStoreEntryActions</property>
             <property name="enable_grid_lines">horizontal</property>
             <child>
+              <object class="GtkTreeViewColumn" id="Enabled">
+                <property name="title">Enabled</property>
+                <child>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle14"/>
+                  <attributes>
+                    <attribute name="active">0</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
               <object class="GtkTreeViewColumn" id="Action">
                 <property name="title">Action</property>
                 <child>
@@ -645,8 +658,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entrySave</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -659,8 +672,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryClose</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
