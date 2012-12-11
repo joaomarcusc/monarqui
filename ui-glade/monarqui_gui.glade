@@ -419,6 +419,35 @@
               </packing>
             </child>
             <child>
+              <object class="GtkHBox" id="hbox2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Ignores:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">5</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entryIgnores">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="invisible_char">&#x25CF;</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkCheckButton" id="checkboxRecursive">
                 <property name="label" translatable="yes">Watch folders recursively</property>
                 <property name="visible">True</property>
@@ -427,7 +456,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -461,7 +490,7 @@
                 </child>
               </object>
               <packing>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -473,7 +502,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -485,7 +514,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -497,7 +526,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -509,7 +538,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -521,7 +550,7 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
-                <property name="position">7</property>
+                <property name="position">8</property>
               </packing>
             </child>
             <child>
@@ -534,7 +563,7 @@
                 </attributes>
               </object>
               <packing>
-                <property name="position">8</property>
+                <property name="position">9</property>
               </packing>
             </child>
           </object>
@@ -551,9 +580,13 @@
             <property name="enable_grid_lines">horizontal</property>
             <child>
               <object class="GtkTreeViewColumn" id="Enabled">
+                <property name="resizable">True</property>
                 <property name="title">Enabled</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle14"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle14">
+                    <signal name="toggled" handler="on_entryAction_enabled_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">0</attribute>
                   </attributes>
@@ -562,6 +595,7 @@
             </child>
             <child>
               <object class="GtkTreeViewColumn" id="Action">
+                <property name="resizable">True</property>
                 <property name="title">Action</property>
                 <child>
                   <object class="GtkCellRendererSpin" id="cellrendererspin1"/>
@@ -573,9 +607,14 @@
             </child>
             <child>
               <object class="GtkTreeViewColumn" id="globs">
+                <property name="resizable">True</property>
                 <property name="title">Globs</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                  <object class="GtkCellRendererText" id="cellrenderertext3">
+                    <property name="editable">True</property>
+                    <signal name="edited" handler="on_entryAction_globs_edited"/>
+                  </object>
                   <attributes>
                     <attribute name="text">2</attribute>
                   </attributes>
@@ -585,8 +624,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn9">
                 <property name="title">Create</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle8"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle8">
+                    <signal name="toggled" handler="on_entryAction_create_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">3</attribute>
                   </attributes>
@@ -596,8 +638,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn10">
                 <property name="title">Modify</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle9"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle9">
+                    <signal name="toggled" handler="on_entryAction_modify_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">4</attribute>
                   </attributes>
@@ -607,8 +652,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn11">
                 <property name="title">Delete</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle10"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle10">
+                    <signal name="toggled" handler="on_entryAction_delete_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">5</attribute>
                   </attributes>
@@ -618,8 +666,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn12">
                 <property name="title">Attribs</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle11"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle11">
+                    <signal name="toggled" handler="on_entryAction_attribs_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">6</attribute>
                   </attributes>
@@ -629,8 +680,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn13">
                 <property name="title">Move From</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle12"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle12">
+                    <signal name="toggled" handler="on_entryAction_movefrom_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">7</attribute>
                   </attributes>
@@ -640,8 +694,11 @@
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn14">
                 <property name="title">Move To</property>
+                <property name="clickable">True</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle13"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle13">
+                    <signal name="toggled" handler="on_entryAction_moveto_toggled"/>
+                  </object>
                   <attributes>
                     <attribute name="active">8</attribute>
                   </attributes>

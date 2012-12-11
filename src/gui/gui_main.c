@@ -50,6 +50,7 @@ struct s_gui_data
   GtkListStore *listStoreEntryActions;
   
   GtkTreeView *treeviewEntries;
+  GtkTreeView *treeviewEntryActions;
   
   GtkBuilder *builder;
 };
@@ -144,6 +145,9 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf
 {
   if(path && entry)
   {
+    char *ignores = string_join(entry->ignore_files);
+    gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores")), ignores);
+    free(ignores);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), path);
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), entry->recursive);	
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
@@ -162,6 +166,7 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf
   } 
   else
   {
+    gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores")), "");
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), NULL);
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), 0);	
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
@@ -201,8 +206,7 @@ void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_ent
       conf_action_entry = monconf_action_entry_get_by_name(conf_entry, action_entry->name);    
       if(conf_action_entry != NULL)
 	str_globs = string_join(conf_action_entry->globs);
-    }
-    
+    }    
     gtk_list_store_append(gui_data->listStoreEntryActions, &iter);
     gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
            COL_ACTION_ENTRY_ENABLED, (gboolean)(conf_action_entry != NULL),       
@@ -346,6 +350,7 @@ int main (int argc, char *argv[])
   data.args = &args;
   data.conf = conf;
   data.treeviewEntries = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewEntries"));
+  data.treeviewEntryActions = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewEntryActions"));
   data.listStoreActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreActions"));  
   data.listStoreEntries = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntries"));
   data.listStoreEntryActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntryActions"));  
@@ -390,6 +395,20 @@ void populate_config(struct s_gui_data *gui_data)
     item = item->next;
   }
 }
+
+void on_entryAction_enabled_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  GtkTreeModel     *model;
+  GtkTreeIter       iter;  
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  gboolean active = (gtk_cell_renderer_toggle_get_active(cell_renderer) ? FALSE : TRUE);
+  model = gtk_tree_view_get_model(gui_data->treeviewEntryActions);
+  gtk_tree_model_get_iter_from_string(model, &iter, path);  
+  gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
+           COL_ACTION_ENTRY_ENABLED, active,
+	   -1);  
+}
+
 
 
 
