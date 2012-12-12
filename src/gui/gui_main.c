@@ -396,19 +396,73 @@ void populate_config(struct s_gui_data *gui_data)
   }
 }
 
-void on_entryAction_enabled_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+void toggle_cell_checkbox(GtkTreeView *treeview, GtkListStore *listStore, GtkCellRendererToggle *cell_renderer, gchar *path, int row_index)
 {
   GtkTreeModel     *model;
   GtkTreeIter       iter;  
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
   gboolean active = (gtk_cell_renderer_toggle_get_active(cell_renderer) ? FALSE : TRUE);
-  model = gtk_tree_view_get_model(gui_data->treeviewEntryActions);
+  model = gtk_tree_view_get_model(treeview);
   gtk_tree_model_get_iter_from_string(model, &iter, path);  
-  gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
-           COL_ACTION_ENTRY_ENABLED, active,
+  gtk_list_store_set(listStore,&iter,
+           row_index, active,		    
 	   -1);  
 }
 
+void on_entryAction_enabled_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_ENABLED);
+}
+
+void on_entryAction_globs_edited(GtkCellRendererText *renderer, gchar *path,
+                                                        gchar *new_text,
+                                                        gpointer user_data)
+{
+  GtkTreeModel     *model;
+  GtkTreeIter       iter; 
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  model = gtk_tree_view_get_model(gui_data->treeviewEntryActions);
+  gtk_tree_model_get_iter_from_string(model, &iter, path);  
+  gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
+           COL_ACTION_ENTRY_GLOBS, new_text,		    
+	   -1);    
+}
+
+void on_entryAction_create_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_CREATE);
+}
+
+void on_entryAction_modify_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_MODIFY);
+}
+
+void on_entryAction_delete_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_DELETE);
+}
+
+void on_entryAction_attribs_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_ATTRIBS);
+}
+
+void on_entryAction_movefrom_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_MOVED_FROM);
+}
+
+void on_entryAction_moveto_toggled(GtkCellRendererToggle *cell_renderer, gchar *path,gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  toggle_cell_checkbox(gui_data->treeviewEntryActions, gui_data->listStoreEntryActions, cell_renderer, path, COL_ACTION_ENTRY_MOVED_TO);
+}
 
 
 
