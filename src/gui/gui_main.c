@@ -21,6 +21,8 @@
 #define ICON_NAME_STOP "gtk-stop"
 #define ICON_SYSTRAY "folder"
 
+#define MAIN_PAGE_ENTRIES 0
+#define MAIN_PAGE_ACTIONS 0
 struct s_gui_data 
 {  
   pthread_t rthread; 
@@ -33,6 +35,7 @@ struct s_gui_data
   GtkWidget *windowMain;
   GtkWidget *windowEntry;
   GtkWidget *windowConfig;
+  GtkWidget *windowAction;
   
   GtkAction *action_mainExit;
   GtkAction *action_configOpen;
@@ -41,6 +44,9 @@ struct s_gui_data
   GtkAction *action_entryAdd;  
   GtkAction *action_entryModify;  
   GtkAction *action_entryDelete;  
+  GtkAction *action_actionAdd;  
+  GtkAction *action_actionModify;  
+  GtkAction *action_actionDelete;  
   GtkAction *action_saveConfig;  
   
   GtkImage *image_startStop;
@@ -49,12 +55,14 @@ struct s_gui_data
   GtkListStore *listStoreEntries;
   GtkListStore *listStoreEntryActions;
   
+  GtkTreeView *treeviewActions;
   GtkTreeView *treeviewEntries;
   GtkTreeView *treeviewEntryActions;
   
   GtkBuilder *builder;
   
   monconf_entry *curr_entry;
+  monaction_entry *curr_action;
 };
 
 enum
@@ -83,8 +91,16 @@ enum
   COL_ACTION_ENTRY_MOVED_TO
 };
 
-void populate_config(struct s_gui_data *gui_data);
+enum
+{
+  COL_ACTION_NAME=0,
+  COL_ACTION_TYPE,
+  COL_ACTION_SCRIPT
+};
+
+void populate_entries(struct s_gui_data *gui_data);
 void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_entry);
+void populate_actions(struct s_gui_data *gui_data);
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 {
@@ -175,7 +191,7 @@ void on_action_entrySave_activate(GtkAction *action, gpointer user_data)
     valid = gtk_tree_model_iter_next(model, &iter);
   }
   
-  populate_config(gui_data);
+  populate_entries(gui_data);  
 }
 
 void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
@@ -218,15 +234,15 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
     on_reactlist_start(gui_data);
   }
 }
-void populate_entry_config(struct s_gui_data *gui_data, const char *path)
+void populate_entry_config(struct s_gui_data *gui_data)
 {
   monconf_entry *entry = gui_data->curr_entry;
-  if(path && gui_data->curr_entry)
+  if(gui_data->curr_entry)
   {
     char *ignores = string_join(entry->ignore_files);
     gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores")), ignores);
     free(ignores);
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), path);
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath")), gui_data->curr_entry->file_name);
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button), entry->recursive);	
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button), 
 				  entry->events & MON_CREATE);	
@@ -260,6 +276,20 @@ void populate_entry_config(struct s_gui_data *gui_data, const char *path)
     gtk_toggle_button_set_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button), 
 				  0);	
     populate_entry_actions(gui_data, NULL);
+  }  
+}
+
+void populate_action_config(struct s_gui_data *gui_data)
+{
+  if(gui_data->curr_action)
+  {
+    gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryActionName")), gui_data->curr_action->name);
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserActionPath")), monconf_resolve_path(gui_data->curr_action->script));
+  } 
+  else
+  {
+    gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryActionName")), NULL);
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserActionPath")),  NULL);
   }
   
 }
@@ -316,7 +346,7 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
     case EDIT_ACTION_ADD:            
       show_window = 1;
       gui_data->curr_entry = NULL;
-      populate_entry_config(gui_data,NULL);
+      populate_entry_config(gui_data);
       break;
     case EDIT_ACTION_MODIFY:    
       selection = gtk_tree_view_get_selection(gui_data->treeviewEntries);
@@ -326,7 +356,7 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
 	gtk_tree_model_get (model, &iter, COL_ENTRY_PATH, &path, -1);
         monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
 	gui_data->curr_entry = entry;
-	populate_entry_config(gui_data, path);
+	populate_entry_config(gui_data);
 	g_free(path);
 	show_window = 1;
       }
@@ -336,6 +366,78 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
     gtk_widget_show(gui_data->windowEntry);
 }
 
+void show_action_window(struct s_gui_data *gui_data, int action_type)
+{
+  GtkTreeSelection *selection;
+  GtkTreeModel     *model;
+  GtkTreeIter       iter;  
+  char show_window = 0;  
+  switch(action_type)
+  {
+    case EDIT_ACTION_ADD:            
+      show_window = 1;
+      gui_data->curr_action = NULL;
+      populate_action_config(gui_data);
+      break;
+    case EDIT_ACTION_MODIFY:    
+      selection = gtk_tree_view_get_selection(gui_data->treeviewActions);
+      if (gtk_tree_selection_get_selected(selection, &model, &iter))
+      {
+	gchar *action_name;    
+	gtk_tree_model_get (model, &iter, COL_ACTION_NAME, &action_name, -1);
+        monaction_entry *entry = monconf_action_get_by_name(gui_data->conf, action_name);
+	gui_data->curr_action = entry;
+	populate_action_config(gui_data);
+	g_free(action_name);
+	show_window = 1;
+      }
+      break;
+  }
+  if(show_window) 
+    gtk_widget_show(gui_data->windowAction);  
+}
+
+void on_action_mainAdd_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
+  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
+  {
+    gtk_action_activate(gui_data->action_entryAdd);
+  }
+  else
+  {
+    gtk_action_activate(gui_data->action_actionAdd);
+  }
+}
+
+void on_action_mainModify_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
+  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
+  {
+    gtk_action_activate(gui_data->action_entryModify);
+  }
+  else
+  {
+    gtk_action_activate(gui_data->action_actionModify);
+  }  
+}
+
+void on_action_mainDelete_activate(GtkAction *action, gpointer user_data)
+{
+    struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
+  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
+  {
+    gtk_action_activate(gui_data->action_entryDelete);
+  }
+  else
+  {
+    gtk_action_activate(gui_data->action_actionDelete);
+  }
+}
 
 void on_action_entryAdd_activate(GtkAction *action, gpointer user_data)
 {
@@ -372,11 +474,39 @@ void on_action_entryDelete_activate(GtkAction *action, gpointer user_data)
     if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_YES)
     {
       monconf_remove_entry(gui_data->conf, entry);
-      populate_config(gui_data);
+      populate_entries(gui_data);
     }
     gtk_widget_destroy(dialog);      
     g_free(path);
   }
+}
+
+void on_action_actionAdd_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  show_action_window(gui_data, EDIT_ACTION_ADD);
+}
+
+void on_action_actionModify_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  show_action_window(gui_data, EDIT_ACTION_MODIFY);
+}
+
+void on_action_actionDelete_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data; 
+}
+
+void on_action_actionSave_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data; 
+}
+
+void on_action_actionClose_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data; 
+  gtk_widget_hide(gui_data->windowAction);
 }
 
 void on_action_saveConfig_activate(GtkAction *action, gpointer user_data)
@@ -418,6 +548,7 @@ int main (int argc, char *argv[])
   data.windowMain = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowMain"));
   data.windowEntry = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowEntry"));
   data.windowConfig = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowConfig"));
+  data.windowAction = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowAction"));
   data.action_mainExit = GTK_ACTION(gtk_builder_get_object(data.builder, "action_mainExit"));
   data.action_configOpen = GTK_ACTION(gtk_builder_get_object(data.builder, "action_configOpen"));
   data.action_configClose = GTK_ACTION(gtk_builder_get_object(data.builder, "action_configClose"));
@@ -425,10 +556,14 @@ int main (int argc, char *argv[])
   data.action_entryAdd = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryAdd"));
   data.action_entryModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryModify"));
   data.action_entryDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryDelete"));
+  data.action_actionAdd = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionAdd"));
+  data.action_actionModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionModify"));
+  data.action_actionDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionDelete"));
   data.action_saveConfig = GTK_ACTION(gtk_builder_get_object(data.builder, "action_saveConfig"));  
   data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(data.builder,"image_startStop"));  
   data.args = &args;
   data.conf = conf;
+  data.treeviewActions = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewActions"));
   data.treeviewEntries = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewEntries"));
   data.treeviewEntryActions = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewEntryActions"));
   data.listStoreActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreActions"));  
@@ -440,15 +575,15 @@ int main (int argc, char *argv[])
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
   systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
   gtk_status_icon_set_visible(systray_icon, TRUE);
-  populate_config(&data);  
-  
+  populate_entries(&data);  
+  populate_actions(&data);
   gtk_widget_show (data.windowMain);                
   gtk_main ();
   g_object_unref (G_OBJECT (data.builder));    
   return 0;
 }
 
-void populate_config(struct s_gui_data *gui_data) 
+void populate_entries(struct s_gui_data *gui_data) 
 {
   GtkTreeModel *modelEntries;
   GtkTreeIter iter;
@@ -474,6 +609,41 @@ void populate_config(struct s_gui_data *gui_data)
   
     item = item->next;
   }
+}
+
+void populate_actions(struct s_gui_data *gui_data)
+{
+  GtkTreeIter iter;
+  monaction_entry *action_entry;
+  gtk_list_store_clear(gui_data->listStoreActions);
+  GList *action_list = g_hash_table_get_values(gui_data->conf->actionMap);
+  GList *item = g_list_first(action_list);
+  while(item)
+  {
+    char *type_str;
+    switch(action_entry->type)
+    {
+      case MON_ACT_SHELL:
+	type_str = STR_ACT_SHELL;
+	break;
+      case MON_ACT_LOG:
+	type_str = STR_ACT_LOG;
+	break;
+      default:
+	type_str = STR_ACT_LUA;
+	break;
+    }
+    action_entry = (monaction_entry *)item->data;
+    gtk_list_store_append(gui_data->listStoreActions, &iter);
+    gtk_list_store_set(gui_data->listStoreActions, &iter,
+		       COL_ACTION_NAME, action_entry->name,
+		       COL_ACTION_TYPE, type_str,
+		       COL_ACTION_SCRIPT, action_entry->script,
+		       -1);
+		       
+    item = item->next;
+  }
+  g_list_free(action_list);
 }
 
 void toggle_cell_checkbox(GtkTreeView *treeview, GtkListStore *listStore, GtkCellRendererToggle *cell_renderer, gchar *path, int row_index)

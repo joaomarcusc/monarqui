@@ -13,6 +13,7 @@
 #include <getopt.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <unistd.h>
 
 monconf *monconf_create()
 {
@@ -570,7 +571,7 @@ void monconf_find_config(config_args*args)
   {
     home = getenv("HOME");
     config_file_path = g_strdup_printf("%s/.monarqui/config.xml", home);  
-    if(stat("config.xml",&st) >= 0)
+    if(stat(config_file_path,&st) >= 0)
     {
       args->config_path = g_strdup(config_file_path);      
     }
@@ -594,4 +595,82 @@ monconf_entry *monconf_entry_get_by_path(monconf *conf, char *path)
 monaction_entry *monconf_action_get_by_name(monconf *conf, const char *action_name)
 {
   return (monaction_entry *)g_hash_table_lookup(conf->actionMap, action_name);
+}
+
+char *monconf_resolve_path(const char *path)
+{
+  struct stat st;
+  char *home;
+  char *cwd;
+  char *temp_file_path;
+  char *real_path = NULL;
+  home = getenv("HOME");
+  if(stat(path,&st) >= 0)
+  {
+    real_path = g_strdup(path);
+  }
+  if(!real_path)
+  {
+
+    temp_file_path = g_strdup_printf("%s/.monarqui/%s", home, path);  
+    if(stat(temp_file_path,&st) >= 0)
+    {
+      real_path = temp_file_path;
+    }
+    else
+    {
+      g_free(temp_file_path);     
+    }
+  }
+  if(!real_path)
+  {
+    temp_file_path = g_strdup_printf("/usr/share/monarqui/%s", home, path);  
+    if(stat(temp_file_path,&st) >= 0)
+    {
+      real_path = temp_file_path;
+    }
+    else
+    {
+      g_free(temp_file_path);     
+    }    
+  }  
+  if(!real_path)
+  {
+    temp_file_path = g_strdup_printf("/usr/local/share/monarqui/%s", home, path);  
+    if(stat(temp_file_path,&st) >= 0)
+    {
+      real_path = temp_file_path;
+    }
+    else
+    {
+      g_free(temp_file_path);     
+    }   
+  }  
+  if(!real_path)
+  {
+    temp_file_path = g_strdup_printf("/opt/monarqui/%s", home, path);  
+    if(stat(temp_file_path,&st) >= 0)
+    {
+      real_path = temp_file_path;
+    }
+    else
+    {
+      g_free(temp_file_path);     
+    }
+  }    
+  if(!real_path)
+  {
+    cwd = getcwd(NULL,0);
+    temp_file_path = g_strdup_printf("%s/%s", cwd, path);
+    if(stat(temp_file_path,&st) >= 0)
+    {
+      real_path = temp_file_path;
+    }
+    else
+    {
+      g_free(temp_file_path);     
+    }
+    free(cwd);
+  }    
+  return real_path;
 }

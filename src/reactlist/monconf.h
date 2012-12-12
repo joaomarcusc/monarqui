@@ -76,5 +76,5 @@ void monconf_prepare_config_directory();
 void monconf_parse_cli_args(config_args *args,int argc, char **argv);
 void monconf_free_cli_args(config_args *args);
 void monconf_find_config(config_args *args);
-
+char *monconf_resolve_path(const char *path);
 #endif
