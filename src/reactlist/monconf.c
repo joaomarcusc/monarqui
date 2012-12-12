@@ -56,6 +56,12 @@ void monconf_remove_entry(monconf *conf, monconf_entry *entry)
   monconf_free_entry(entry);
 }
 
+void monconf_entry_remove_action_entry(monconf_entry *conf_entry, monconf_action_entry *action_entry)
+{
+  conf_entry->actions= g_list_remove(g_list_first(conf_entry->actions),action_entry);
+  monconf_free_action_entry(action_entry);
+}
+
 void monconf_read_config(monconf *conf,const char *cfg_file)
 {  
   monconf_entry *entry;
@@ -311,6 +317,15 @@ void monconf_action_entry_add_glob(monconf_action_entry *action_entry, char *dat
 
 void monconf_entry_add_ignores_from_csv(monconf_entry *entry, char *csv_data)
 {
+  GList *list_item;
+  list_item = g_list_first(entry->ignore_files);
+  while(list_item)
+  {
+    free((char *)list_item->data);
+    list_item = list_item->next;
+  }
+  g_list_free(g_list_first(entry->ignore_files));
+  entry->ignore_files = NULL;
   char *tmpdata = strdup(csv_data);
   char *token, *rest;
   int size = 0;
@@ -325,6 +340,15 @@ void monconf_entry_add_ignores_from_csv(monconf_entry *entry, char *csv_data)
 
 void monconf_action_entry_add_globs_from_csv(monconf_action_entry *entry, char *csv_data)
 {
+  GList *list_item;
+  list_item = g_list_first(entry->globs);
+  while(list_item)
+  {
+    free((char *)list_item->data);
+    list_item = list_item->next;
+  }
+  g_list_free(g_list_first(entry->globs));
+  entry->globs = NULL;
   char *tmpdata = strdup(csv_data);
   char *token, *rest;
   int size = 0;
@@ -564,4 +588,9 @@ monconf_entry *monconf_entry_get_by_path(monconf *conf, char *path)
     item = item->next;
   }
   return NULL;
+}
+
+monaction_entry *monconf_action_get_by_name(monconf *conf, const char *action_name)
+{
+  return (monaction_entry *)g_hash_table_lookup(conf->actionMap, action_name);
 }

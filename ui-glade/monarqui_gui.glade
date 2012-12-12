@@ -241,7 +241,6 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle1"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="active">1</attribute>
                       </attributes>
                     </child>
@@ -253,7 +252,6 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle2"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="active">2</attribute>
                       </attributes>
                     </child>
@@ -265,7 +263,6 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle3"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="active">3</attribute>
                       </attributes>
                     </child>
@@ -277,7 +274,6 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle4"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="active">4</attribute>
                       </attributes>
                     </child>
@@ -289,7 +285,6 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle5"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="active">5</attribute>
                       </attributes>
                     </child>
@@ -301,8 +296,7 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle6"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
-                        <attribute name="radio">6</attribute>
+                        <attribute name="active">6</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -313,8 +307,7 @@
                     <child>
                       <object class="GtkCellRendererToggle" id="cellrenderertoggle7"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
-                        <attribute name="radio">7</attribute>
+                        <attribute name="active">7</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -325,7 +318,6 @@
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext2"/>
                       <attributes>
-                        <attribute name="visible">1</attribute>
                         <attribute name="text">8</attribute>
                       </attributes>
                     </child>
@@ -598,7 +590,7 @@
                 <property name="resizable">True</property>
                 <property name="title">Action</property>
                 <child>
-                  <object class="GtkCellRendererSpin" id="cellrendererspin1"/>
+                  <object class="GtkCellRendererText" id="cellrendererspin1"/>
                   <attributes>
                     <attribute name="text">1</attribute>
                   </attributes>

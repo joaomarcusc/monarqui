@@ -53,6 +53,8 @@ struct s_gui_data
   GtkTreeView *treeviewEntryActions;
   
   GtkBuilder *builder;
+  
+  monconf_entry *curr_entry;
 };
 
 enum
@@ -98,7 +100,74 @@ void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 
 void on_action_entrySave_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data; 
+  GList *list_item;
+  monconf *conf = gui_data->conf;
+  monconf_action_entry *action_entry;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  g_free(gui_data->curr_entry->file_name);
+  monconf_entry_add_ignores_from_csv(gui_data->curr_entry, (char *)gtk_entry_get_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores"))));
+  gui_data->curr_entry->file_name = g_strdup(gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath"))));
+  gui_data->curr_entry->recursive = (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button)) ? TRUE : FALSE);
+  gui_data->curr_entry->events = 
+    (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnCreate"))->toggle_button)) ? MON_CREATE : 0)
+    | (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnModify"))->toggle_button)) ? MON_MODIFY: 0)
+    | (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnDelete"))->toggle_button)) ? MON_DELETE: 0)
+    | (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnAttrib"))->toggle_button)) ? MON_ATTRIB: 0)
+    | (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedFrom"))->toggle_button)) ? MON_MOVED_FROM : 0)
+    | (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxOnMovedTo"))->toggle_button)) ? MON_MOVED_TO: 0);  
+  
+  short int valid;
+  gboolean enabled, event_create, event_modify, event_delete, event_attribs, event_move_from, event_move_to;
+  gchar *action_name, *globs;
+  model = gtk_tree_view_get_model(gui_data->treeviewEntryActions);  
+  valid = gtk_tree_model_get_iter_first(model, &iter);
+  while(valid)
+  {    
+    gboolean move_next = TRUE;
+    gtk_tree_model_get(model, &iter,
+		       COL_ACTION_ENTRY_ENABLED, &enabled, 
+		       COL_ACTION_ENTRY_NAME, &action_name,
+		       COL_ACTION_ENTRY_GLOBS, &globs,
+		       COL_ACTION_ENTRY_CREATE, &event_create,
+		       COL_ACTION_ENTRY_MODIFY, &event_modify,
+		       COL_ACTION_ENTRY_DELETE, &event_delete,
+		       COL_ACTION_ENTRY_ATTRIBS, &event_attribs,
+		       COL_ACTION_ENTRY_MOVED_FROM, &event_move_from,
+		       COL_ACTION_ENTRY_MOVED_TO, &event_move_to,
+		       -1);
+    action_entry = monconf_action_entry_get_by_name(gui_data->curr_entry, action_name);
+    if(!enabled)
+    {
+      if(action_entry)
+      {	
+	monconf_entry_remove_action_entry(gui_data->curr_entry, action_entry);	
+	move_next=0;
+      }
+    }	
+    else
+    {
+      if(!action_entry) 
+      {
+	action_entry = monconf_entry_new_action(gui_data->curr_entry);
+	action_entry->action = monconf_action_get_by_name(conf, action_name);	
+      }
+      monconf_action_entry_add_globs_from_csv(action_entry, globs);
+      action_entry->events =
+	(event_create ? MON_CREATE : 0)
+	| (event_modify ? MON_MODIFY: 0)
+	| (event_delete ? MON_DELETE : 0)
+	| (event_attribs ? MON_ATTRIB : 0)
+	| (event_move_from ? MON_MOVED_FROM : 0)
+	| (event_move_to ? MON_MOVED_TO : 0);		
+    }    
+    g_free(action_name);
+    g_free(globs); 
+    valid = gtk_tree_model_iter_next(model, &iter);
+  }
+  
+  populate_config(gui_data);
 }
 
 void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
@@ -115,7 +184,7 @@ void on_reactlist_start(struct s_gui_data *gui_data)
 void on_reactlist_stop(struct s_gui_data *gui_data) 
 {
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 
-  
+
 }
 
 void on_action_startPause_activate(GtkAction *action, gpointer user_data)
@@ -141,9 +210,10 @@ void on_action_startPause_activate(GtkAction *action, gpointer user_data)
     on_reactlist_start(gui_data);
   }
 }
-void populate_entry_config(struct s_gui_data *gui_data, const char *path,monconf_entry *entry)
+void populate_entry_config(struct s_gui_data *gui_data, const char *path)
 {
-  if(path && entry)
+  monconf_entry *entry = gui_data->curr_entry;
+  if(path && gui_data->curr_entry)
   {
     char *ignores = string_join(entry->ignore_files);
     gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores")), ignores);
@@ -210,7 +280,7 @@ void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_ent
     gtk_list_store_append(gui_data->listStoreEntryActions, &iter);
     gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
            COL_ACTION_ENTRY_ENABLED, (gboolean)(conf_action_entry != NULL),       
-	   COL_ACTION_ENTRY_NAME, action_entry->name,		       
+	   COL_ACTION_ENTRY_NAME, (gchar *)action_entry->name,		       
            COL_ACTION_ENTRY_GLOBS, (conf_action_entry != NULL ? string_join(conf_action_entry->globs) : ""),           
            COL_ACTION_ENTRY_CREATE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_CREATE) : (gboolean)0),
            COL_ACTION_ENTRY_MODIFY, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MODIFY) : (gboolean)0),
@@ -237,7 +307,8 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
   {
     case EDIT_ACTION_ADD:            
       show_window = 1;
-      populate_entry_config(gui_data,NULL,NULL);
+      gui_data->curr_entry = NULL;
+      populate_entry_config(gui_data,NULL);
       break;
     case EDIT_ACTION_MODIFY:    
       selection = gtk_tree_view_get_selection(gui_data->treeviewEntries);
@@ -246,7 +317,8 @@ void show_config_window(struct s_gui_data *gui_data, int action_type)
 	gchar *path;    
 	gtk_tree_model_get (model, &iter, COL_ENTRY_PATH, &path, -1);
         monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
-	populate_entry_config(gui_data, path, entry);
+	gui_data->curr_entry = entry;
+	populate_entry_config(gui_data, path);
 	g_free(path);
 	show_window = 1;
       }
@@ -381,7 +453,7 @@ void populate_config(struct s_gui_data *gui_data)
     gtk_list_store_append(gui_data->listStoreEntries, &iter);
     gtk_list_store_set(gui_data->listStoreEntries,&iter,
            COL_ENTRY_PATH, entry->file_name,
-           COL_ENTRY_RECURSIVE, (gboolean)entry->recursive,
+           COL_ENTRY_RECURSIVE, (gboolean)(entry->recursive),
            COL_ENTRY_EVENT_CREATE, (gboolean)(entry->events & MON_CREATE),
            COL_ENTRY_EVENT_MODIFY, (gboolean)(entry->events & MON_MODIFY),
            COL_ENTRY_EVENT_DELETE, (gboolean)(entry->events & MON_DELETE),
