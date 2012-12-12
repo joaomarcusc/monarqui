@@ -107,6 +107,7 @@ void *run_listener(void *startarg)
   }
   printf("Closing listener...\n");
   zmq_close(pub_socket);
+  monwatch_free(watch);
   start->socket_bound = 0;
   start->active = 0;
   pthread_exit(NULL);

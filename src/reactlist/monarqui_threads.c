@@ -21,7 +21,7 @@ void start_reactor_and_listener(monconf *conf, pthread_t* rthread, reactstart* r
   int ltr, rtr;    
   int signum;      
   
-  monconf_execute_preload_actions(conf);
+  monconf_initialize_scripts(conf);
   rstart->conf = conf;
   rstart->zmq_context = zmq_init(0);
   rstart->usr_interrupt = 0;
@@ -45,8 +45,6 @@ void stop_reactor_and_listener(pthread_t* rthread, reactstart* rstart, void *rst
   rstart->usr_interrupt = 1;
   lstart->usr_interrupt = 1;
   while(rstart->active || lstart->active);
-  monconf_free(lstart->conf); 
-  monwatch_free(lstart->watch);
   zmq_close(lstart->zmq_context);      
   rstart->usr_interrupt = 0;
   rstart->active = 0;

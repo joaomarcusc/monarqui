@@ -10,7 +10,6 @@ function deltree(dir)
     end
   end
   os.remove(dir)
-  return true
 end
 
 function walk_tree(dir)

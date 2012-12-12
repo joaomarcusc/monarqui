@@ -121,8 +121,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
     action_entry = monconf_new_action(conf, action_tmp.name);
     action_entry->type = action_tmp.type;
     action_entry->script = g_strdup(action_tmp.script);  
-    g_free(action_tmp.name);
-    monaction_init_state(action_entry);
+    g_free(action_tmp.name);    
   }
   xmlXPathFreeObject(xobj);  
   xmlXPathFreeContext(xctx);
@@ -212,7 +211,7 @@ void monconf_free(monconf *conf)
   int num_entries = monconf_num_entries(conf);
   monaction_entry *action_entry;  
   g_list_foreach(g_list_first(conf->entrylist), &monconf_free_entry_gfunc, NULL);
-  GList *keys = g_hash_table_get_keys(conf->actionMap);  
+  GList *keys = g_hash_table_get_values(conf->actionMap);  
   item = g_list_first(keys);
   while(item)
   {
@@ -228,8 +227,7 @@ void monconf_free(monconf *conf)
 
 void monaction_free_entry(monaction_entry *action)
 {  
-  if(action->luaState)
-    lua_close(action->luaState);
+  monaction_close_state(action);
   g_free(action->name);
   g_free(action->script);
   g_free(action);
@@ -299,6 +297,7 @@ monaction_entry *monconf_new_action(monconf *conf, const char *str_name)
 {
   monaction_entry *entry = malloc(sizeof(monaction_entry));
   entry->name = g_strdup(str_name);  
+  entry->state_initialized = 0;
   g_hash_table_insert(conf->actionMap,entry->name,entry);
   return entry;
 }
@@ -419,7 +418,7 @@ void monconf_dump(monconf *conf)
   g_list_free(action_names);
 }
 
-void monconf_execute_preload_actions(monconf *conf)
+void monconf_initialize_scripts(monconf *conf)
 {
   lua_State *L;
   monconf_action_entry *conf_action_entry_ptr;
@@ -429,7 +428,9 @@ void monconf_execute_preload_actions(monconf *conf)
   GList *action_item = g_list_first(action_names);
   while(action_item)
   {
-    action_ptr = (monaction_entry *)g_hash_table_lookup(conf->actionMap,action_item->data);
+    action_ptr = (monaction_entry *)g_hash_table_lookup(conf->actionMap,action_item->data); 
+    monaction_close_state(action_ptr);
+    monaction_init_state(action_ptr);
     L = action_ptr->luaState;
     lua_getglobal(L, "initialize");    
     lua_pushnil(L);

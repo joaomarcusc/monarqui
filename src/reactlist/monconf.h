@@ -69,7 +69,7 @@ void monconf_action_entry_add_globs_from_csv(monconf_action_entry *entry, char *
 void monaction_free_entry(monaction_entry *action);
 void monaction_free_entry_gfunc(gpointer data, gpointer user_data);
 void monconf_dump(monconf *conf);
-void monconf_execute_preload_actions(monconf *conf);
+void monconf_initialize_scripts(monconf *conf);
 int monconf_action_match_entry_globs(monconf_action_entry *action_entry, const char *full_path);
 int monconf_entry_match_ignores(monconf_entry *conf_entry, const char *file_name);
 void monconf_prepare_config_directory();

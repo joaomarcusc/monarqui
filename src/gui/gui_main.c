@@ -95,6 +95,7 @@ void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
     stop_reactor_and_listener(&(gui_data->rthread), &(gui_data->rstart), &rstop_status, 
             &(gui_data->lthread), &(gui_data->lstart), &lstop_status);
   }
+  monconf_free(gui_data->conf);  
   gtk_main_quit();
 }
 
@@ -106,7 +107,14 @@ void on_action_entrySave_activate(GtkAction *action, gpointer user_data)
   monconf_action_entry *action_entry;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  g_free(gui_data->curr_entry->file_name);
+  if(gui_data->curr_entry != NULL)
+  {
+    g_free(gui_data->curr_entry->file_name);
+  }
+  else
+  {
+    gui_data->curr_entry = monconf_new_entry(gui_data->conf);
+  }
   monconf_entry_add_ignores_from_csv(gui_data->curr_entry, (char *)gtk_entry_get_text(GTK_ENTRY(gtk_builder_get_object(gui_data->builder,"entryIgnores"))));
   gui_data->curr_entry->file_name = g_strdup(gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(gtk_builder_get_object(gui_data->builder,"filechooserPath"))));
   gui_data->curr_entry->recursive = (gtk_toggle_button_get_active(&(GTK_CHECK_BUTTON(gtk_builder_get_object(gui_data->builder,"checkboxRecursive"))->toggle_button)) ? TRUE : FALSE);
