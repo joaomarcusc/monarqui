@@ -20,7 +20,6 @@ void start_reactor_and_listener(monconf *conf, pthread_t* rthread, reactstart* r
   pthread_attr_t attr;
   int ltr, rtr;    
   int signum;      
-  
   monconf_initialize_scripts(conf);
   rstart->conf = conf;
   rstart->zmq_context = zmq_init(0);

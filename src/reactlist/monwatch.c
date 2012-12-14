@@ -64,7 +64,6 @@ void monwatch_process_config(monwatch *watch, monconf *conf)
 void _monwatch_config_iterator_aux(char *file_name, monconf_entry *entry, monwatch *watch, int depth)
 {  
   struct dirent * dir_entry;
-  //TODO: avoid buffer overflow here
   char *subdir_name;  
   DIR *dir;    
   if(depth > entry->max_depth)

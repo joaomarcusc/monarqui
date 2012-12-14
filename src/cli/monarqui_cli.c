@@ -37,9 +37,11 @@ int main(int argc, char **argv)
   int signum;
   sigset_t oldmask, mask, pendingMask;
   monconf_prepare_config_directory();
-  monconf_parse_cli_args(&args, argc, argv);
+  monconf_parse_cli_args(&args, argc, argv);  
   conf = monconf_create();
   monconf_read_config(conf, args.config_path);
+  monconf_load_available_actions(conf);
+  monconf_dump(conf);
   sigemptyset(&mask);
   sigemptyset(&oldmask);
   sigaddset(&mask,SIGHUP);

@@ -14,7 +14,7 @@
     </actions>
     <entries>
         <entry>
-            <path>/home/joao/devel/cpp</path>
+            <path>/home/03106709936/devel/siapenet/cvs/54138siapenet/01-Sistema/06-Implementacao/01-Aplicacao/monitoracao</path>
             <recursive>true</recursive>
             <events>create,delete,moved_to,attrib</events>
             <ignore_files>target,bin</ignore_files>

@@ -1,5 +1,6 @@
 #include "../common/monarqui_common.h"
 #include "monaction.h"
+#include <dirent.h>
 #include "monconf.h"
 #include <string.h>
 #include <fnmatch.h>
@@ -92,49 +93,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
     xmlFreeDoc(doc);
     exit(0);
     return;
-  }
-  xobj = xmlXPathEvalExpression("/config/actions/action", xctx);
-  for(i=0;i<xobj->nodesetval->nodeNr;i++)
-  {
-    node = xobj->nodesetval->nodeTab[i]->children;
-    currNode = node;
-    action_tmp.script = NULL;
-    while(currNode) 
-    {      
-      if(currNode->type == XML_ELEMENT_NODE)
-      {	
-	if(!strcmp(currNode->name,"name"))
-	  action_tmp.name = g_strdup(currNode->children->content);
-	else if(!strcmp(currNode->name,"script"))
-	  action_tmp.script = currNode->children->content;
-	else if(!strcmp(currNode->name,"type")) 
-	{
-	  if(!strcmp(currNode->children->content,STR_ACT_SHELL))	  
-	    action_tmp.type = MON_ACT_SHELL;
-	  else if(!strcmp(currNode->children->content,STR_ACT_LUA))	  
-	    action_tmp.type = MON_ACT_LUA;
-	  else if(!strcmp(currNode->children->content,STR_ACT_LOG))	  
-	    action_tmp.type = MON_ACT_LOG;
-	}
-      }	
-      currNode = currNode->next;
-    }
-    action_entry = monconf_new_action(conf, action_tmp.name);
-    action_entry->type = action_tmp.type;
-    action_entry->script = g_strdup(action_tmp.script);  
-    g_free(action_tmp.name);    
-  }
-  xmlXPathFreeObject(xobj);  
-  xmlXPathFreeContext(xctx);
-  xctx = xmlXPathNewContext(doc);
-  if(xctx == NULL)
-  {
-    //TODO: Tratar erro 
-    fprintf(stderr,"Error parsing config file\n");    
-    xmlFreeDoc(doc);
-    exit(0);
-    return;
-  }
+  }  
   xobj = xmlXPathEvalExpression("/config/entries/entry", xctx);
   for(i=0;i<xobj->nodesetval->nodeNr;i++)
   {
@@ -168,7 +127,13 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 		if(actionNode-> type == XML_ELEMENT_NODE)
 		{
 		  if(!strcmp(actionChildren->name,"name"))
-		    conf_action->action = (monaction_entry*)g_hash_table_lookup(conf->actionMap, actionChildren->children->content);
+		  {
+		    conf_action->action = monconf_action_get_by_name(conf, actionChildren->children->content);
+		    if(conf_action->action == NULL) 
+		    {
+		      conf_action->action = monconf_new_action(conf, actionChildren->children->content);
+		    }
+		  }
 		  if(!strcmp(actionChildren->name,"events"))
 		    conf_action->events = str_events_to_int(actionChildren->children->content);
 		  else if(!strcmp(actionChildren->name,"filter_glob")) 
@@ -188,11 +153,9 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 	}
       }	
       printf("%s\n",currNode->name);
-      monconf_dump(conf);
       currNode = currNode->next;
     }
   }
-  monconf_dump(conf);
   xmlXPathFreeContext(xctx);
   xmlXPathFreeObject(xobj);
   xmlFreeDoc(doc);
@@ -516,6 +479,15 @@ void monconf_prepare_config_directory()
   if(stat(config_file_path, &st) < 0)
   {
     printf("Creating config file under %s\n...",config_file_path);
+    FILE *fconfig = fopen(config_file_path,"w+");
+    fprintf(fconfig,"<?xml version=\"1.0\"?>\n");
+    fprintf(fconfig,"<config>\n");
+    fprintf(fconfig,"    <actions>\n");
+    fprintf(fconfig,"    </actions>\n");
+    fprintf(fconfig,"    <entries>\n");
+    fprintf(fconfig,"    </entries>\n");
+    fprintf(fconfig,"</config>\n");
+    fclose(fconfig);   
   }
   g_free(config_dir);
 }
@@ -562,7 +534,7 @@ void monconf_find_config(config_args*args)
   struct stat st;
   char *home;
   char *config_file_path;
-  
+    
   if(stat("config.xml",&st) >= 0)
   {
     args->config_path = g_strdup("config.xml");    
@@ -571,12 +543,20 @@ void monconf_find_config(config_args*args)
   {
     home = getenv("HOME");
     config_file_path = g_strdup_printf("%s/.monarqui/config.xml", home);  
-    if(stat(config_file_path,&st) >= 0)
+    if(stat(config_file_path,&st) < 0)
     {
-      args->config_path = g_strdup(config_file_path);      
+      FILE *fconfig = fopen(config_file_path,"w+");
+      fprintf(fconfig,"<?xml version=\"1.0\"?>\n");
+      fprintf(fconfig,"<config>\n");
+      fprintf(fconfig,"    <actions>\n");
+      fprintf(fconfig,"    </actions>\n");
+      fprintf(fconfig,"    <entries>\n");
+      fprintf(fconfig,"    </entries>\n");
+      fprintf(fconfig,"</config>\n");
+      fclose(fconfig);      
     }
-    free(home);
-    free(config_file_path);
+    args->config_path = g_strdup(config_file_path);      
+    free(config_file_path);    
   }    
 }
 
@@ -673,4 +653,133 @@ char *monconf_resolve_path(const char *path)
     free(cwd);
   }    
   return real_path;
+}
+
+char *get_file_name(const char *full_file_name) {
+  char *tmp;    
+  const char *start_pos = strrchr(full_file_name, '/');    
+  const char *end_pos= strrchr(full_file_name, '.');  
+    
+  if(start_pos == NULL)
+    start_pos = full_file_name;
+  else
+    start_pos++;
+  int size = 0;  
+  if(end_pos != NULL)
+  {
+    for(tmp=start_pos;tmp!=end_pos;tmp++)
+      size++;
+  }
+  char *file_name = (char *)calloc(size+1,sizeof(char));
+  strncpy(file_name, start_pos, size);
+  return file_name;
+}
+
+const char *get_file_extension(const char *full_file_name) {
+    const char *dot_pos= strrchr(full_file_name, '.');
+    if(!dot_pos|| dot_pos == full_file_name) return "";
+    return dot_pos + 1;
+}
+
+gboolean monconf_file_is_script(const char *path)
+{
+  const char *ext = get_file_extension(path);
+  return !strcmp(ext,"lua");
+}
+
+void monconf_load_actions_from_dir(monconf *conf, const char *path)
+{
+  monaction_entry *action;
+  struct dirent * dir_entry;
+  char *subdir_name;  
+  DIR *dir;    
+  if(access(path, F_OK))
+    return;
+  dir = opendir(path);  
+  if(!dir) 
+    return;
+  dir_entry = readdir(dir);    
+  while(dir_entry)
+  {        
+    if(dir_entry->d_type & DT_DIR && 
+      dir_entry->d_name[0] != '.')
+    {      
+      subdir_name = g_strdup_printf("%s/%s",path,dir_entry->d_name);      	
+      monconf_load_actions_from_dir(conf, subdir_name);      
+      g_free(subdir_name);     
+    } 
+    else if(dir_entry->d_type & DT_REG)
+    {      
+      char *full_path= g_strdup_printf("%s/%s",path,dir_entry->d_name);
+      char *action_name;
+      if(monconf_file_is_script(full_path))
+      {
+		
+	action_name = get_file_name(dir_entry->d_name);
+	action = monconf_action_get_by_name(conf, action_name);
+	if(action == NULL)	
+	  action = monconf_new_action(conf, action_name);
+	
+	action->type = MON_ACT_LUA;
+	action->script = g_strdup(full_path);	
+	free(action_name);
+	g_free(full_path);
+      }
+      
+    }
+//    free(dir_entry);
+    dir_entry = readdir(dir);
+  }  
+  free(dir);  
+}
+
+void monconf_load_available_actions(monconf *conf)
+{
+  struct stat st;
+  char *home;
+  char *cwd;
+  char *temp_file_path;  
+  home = getenv("HOME");
+
+  temp_file_path = g_strdup_printf("%s/.monarqui/actions", home);  
+  if(stat(temp_file_path,&st) >= 0)
+  {    
+    monconf_load_actions_from_dir(conf, temp_file_path);
+  }
+  g_free(temp_file_path);     
+  temp_file_path = NULL;  
+  
+  temp_file_path = g_strdup("/usr/share/monarqui/actions");  
+  if(stat(temp_file_path,&st) >= 0)
+  {    
+    monconf_load_actions_from_dir(conf, temp_file_path);
+  }
+  g_free(temp_file_path);     
+  temp_file_path = NULL;  
+  
+  temp_file_path = g_strdup("/usr/local/share/monarqui/actions");  
+  if(stat(temp_file_path,&st) >= 0)
+  {    
+    monconf_load_actions_from_dir(conf, temp_file_path);
+  }
+  g_free(temp_file_path);     
+  temp_file_path = NULL; 
+  
+  temp_file_path = g_strdup_printf("/opt/monarqui/actions", home);  
+  if(stat(temp_file_path,&st) >= 0)
+  {    
+    monconf_load_actions_from_dir(conf, temp_file_path);
+  }
+  g_free(temp_file_path);     
+  temp_file_path = NULL; 
+      
+  cwd = getcwd(NULL,0);
+  temp_file_path = g_strdup_printf("%s/actions", cwd);
+    if(stat(temp_file_path,&st) >= 0)
+  {    
+    monconf_load_actions_from_dir(conf, temp_file_path);
+  }
+  g_free(temp_file_path);     
+  temp_file_path = NULL; 
+  free(cwd);
 }
