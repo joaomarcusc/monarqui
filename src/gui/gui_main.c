@@ -400,43 +400,19 @@ void show_action_window(struct s_gui_data *gui_data, int action_type)
 void on_action_mainAdd_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
-  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
-  {
-    gtk_action_activate(gui_data->action_entryAdd);
-  }
-  else
-  {
-    gtk_action_activate(gui_data->action_actionAdd);
-  }
+  gtk_action_activate(gui_data->action_entryAdd);
 }
 
 void on_action_mainModify_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
-  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
-  {
-    gtk_action_activate(gui_data->action_entryModify);
-  }
-  else
-  {
-    gtk_action_activate(gui_data->action_actionModify);
-  }  
+  gtk_action_activate(gui_data->action_entryModify);
 }
 
 void on_action_mainDelete_activate(GtkAction *action, gpointer user_data)
 {
-    struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  GtkNotebook *notebook = GTK_NOTEBOOK(gtk_builder_get_object(gui_data->builder, "notebookMain"));
-  if(gtk_notebook_get_current_page(notebook) == MAIN_PAGE_ENTRIES)
-  {
-    gtk_action_activate(gui_data->action_entryDelete);
-  }
-  else
-  {
-    gtk_action_activate(gui_data->action_actionDelete);
-  }
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_action_activate(gui_data->action_entryDelete);
 }
 
 void on_action_entryAdd_activate(GtkAction *action, gpointer user_data)
@@ -534,6 +510,7 @@ int main (int argc, char *argv[])
   monconf_prepare_config_directory();
   monconf *conf = monconf_create();
   monconf_read_config(conf, args.config_path);
+  monconf_load_available_actions(conf);
   data.rstart.active = 0;
   data.lstart.active = 0;
   
