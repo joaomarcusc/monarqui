@@ -476,7 +476,7 @@ void on_action_actionDelete_activate(GtkAction *action, gpointer user_data)
 
 void on_action_actionSave_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data; 
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;   
 }
 
 void on_action_actionClose_activate(GtkAction *action, gpointer user_data)
@@ -487,7 +487,16 @@ void on_action_actionClose_activate(GtkAction *action, gpointer user_data)
 
 void on_action_saveConfig_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  monconf_save_config(gui_data->conf, NULL);
+  /*GtkWidget *dialog;    
+  dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowEntry),
+	    GTK_DIALOG_DESTROY_WITH_PARENT,
+	    GTK_MESSAGE_INFO,
+	    GTK_BUTTONS_OK,
+	    "Config saved at '%s'",gui_data->conf->file_path);
+  gtk_window_set_title(GTK_WINDOW(dialog), "Config Saved");
+  gtk_dialog_run(GTK_DIALOG(dialog));*/
 }
 
 void on_windowMain_destroy (GtkObject *object, gpointer user_data)

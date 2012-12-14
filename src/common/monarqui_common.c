@@ -67,6 +67,35 @@ int str_events_to_int(char *str)
   return events;
 }
 
+char *int_events_to_str(int events) 
+{
+  int idx_arr = 0;  
+  int num_items = 0;
+  int lenstr;
+  const int arr_events_size = 7;
+  const char *arr_events[] = { STR_CREATE, STR_MODIFY, STR_DELETE, STR_ATTRIB, STR_MOVED_FROM, STR_MOVED_FROM, STR_ACCESS};
+  const int int_events[] = { MON_CREATE, MON_MODIFY, MON_DELETE, MON_ATTRIB, MON_MOVED_FROM, MON_MOVED_TO, MON_ACCESS};
+  char *arr_matches[7];
+  for(idx_arr = 0 ; idx_arr < arr_events_size ; idx_arr++)
+  {
+    if(events & int_events[idx_arr]) 
+    {
+      arr_matches[num_items++] = g_strdup(arr_events[idx_arr]);          
+      lenstr += strlen(arr_events[idx_arr]);
+    }
+  }
+  lenstr += num_items;
+  char *retval = (char *)calloc(lenstr,sizeof(char));
+  for(idx_arr = 0 ; idx_arr < num_items ; idx_arr++)
+  {
+    sprintf(&retval[strlen(retval)],"%s",arr_matches[idx_arr]);    
+    free(arr_matches[idx_arr]);
+    if(idx_arr < (num_items-1))
+      sprintf(&retval[strlen(retval)],",");
+  }  
+  return retval;
+}
+
 void show_lua_error(lua_State *L, char *msg){
 	fprintf(stderr, "\nFATAL ERROR:\n  %s: %s\n\n",
 		msg, lua_tostring(L, -1));

@@ -36,6 +36,7 @@ typedef struct s_monconf
   GList *entrylist;      
   GHashTable *actionMap;
   GList *action_search_path;
+  char *file_path;
 } monconf;
 
 typedef struct s_config_args 
@@ -80,4 +81,5 @@ void monconf_find_config(config_args *args);
 char *monconf_resolve_path(const char *path);
 void monconf_load_actions_from_dir(monconf *conf, const char *path);
 void monconf_load_available_actions(monconf *conf);
+void monconf_save_config(monconf *conf, const char *file_path);
 #endif

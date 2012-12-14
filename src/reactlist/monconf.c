@@ -74,7 +74,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
   xmlNode *node, *currNode, *actionNode, *actionChildren;
   xmlXPathContextPtr xctx; 
   xmlXPathObjectPtr xobj;
-  
+  conf->file_path = g_strdup(cfg_file);
   xmlInitParser();
   
   doc = xmlReadFile(cfg_file, NULL, 0);  
@@ -183,6 +183,7 @@ void monconf_free(monconf *conf)
     monaction_free_entry(action_entry);
     item = item->next;
   }
+  g_free(conf->file_path);
   g_list_free(keys);
   g_hash_table_destroy(conf->actionMap);
   g_list_free(conf->entrylist); 
@@ -782,4 +783,39 @@ void monconf_load_available_actions(monconf *conf)
   g_free(temp_file_path);     
   temp_file_path = NULL; 
   free(cwd);
+}
+
+void monconf_save_config(monconf *conf, const char *file_path)
+{
+  monconf_entry *entry;  
+  monconf_action_entry *conf_action;
+  GList *entry_item, *action_entry_item;
+  int num_entries, i;   
+  xmlDocPtr doc;
+  xmlNode *config_node, *entries_node, *entry_node;
+  xmlXPathContextPtr xctx; 
+  xmlXPathObjectPtr xobj;
+  
+  xmlInitParser();
+  doc = xmlNewDoc(BAD_CAST "1.0");
+  config_node = xmlNewNode(NULL, BAD_CAST "config");
+  xmlDocSetRootElement(doc, config_node);
+  entries_node = xmlNewChild(config_node, NULL, BAD_CAST "entries", NULL);
+  
+  entry_item = g_list_first(conf->entrylist);
+  while(entry_item)
+  {
+    entry = (monconf_entry *)entry_item->data;
+    entry_node = xmlNewChild(entries_node, NULL, BAD_CAST "entry", NULL);
+    xmlNewChild(entry_node, NULL, BAD_CAST "path", BAD_CAST (entry->file_name));
+    xmlNewChild(entry_node, NULL, BAD_CAST "recursive", BAD_CAST (entry->recursive ? "true" : "false"));
+    xmlNewChild(entry_node, NULL, BAD_CAST "events", BAD_CAST (int_events_to_str(entry->events)));
+    xmlNewChild(entry_node, NULL, BAD_CAST "ignores", BAD_CAST (string_join(g_list_first(entry->ignore_files))));
+    entry_item = entry_item->next;
+  }
+  FILE *f = fopen(file_path == NULL ? conf->file_path : file_path,"w+");
+  xmlDocDump(f,doc);
+  fclose(f);
+  xmlFreeDoc(doc);
+  xmlCleanupParser();  
 }
