@@ -151,8 +151,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 	    actionNode = actionNode->next;
 	  }
 	}
-      }	
-      printf("%s\n",currNode->name);
+      }	      
       currNode = currNode->next;
     }
   }
@@ -743,7 +742,7 @@ void monconf_load_available_actions(monconf *conf)
   char *temp_file_path;  
   home = getenv("HOME");
 
-  temp_file_path = g_strdup_printf("%s/.monarqui/actions", home);  
+  temp_file_path = g_strdup_printf("%s/.monarqui/", home);  
   if(stat(temp_file_path,&st) >= 0)
   {    
     monconf_load_actions_from_dir(conf, temp_file_path);
@@ -797,7 +796,6 @@ void monconf_save_config(monconf *conf, const char *file_path)
   xmlXPathContextPtr xctx; 
   xmlXPathObjectPtr xobj;
   
-  xmlInitParser();
   doc = xmlNewDoc(BAD_CAST "1.0");
   config_node = xmlNewNode(NULL, BAD_CAST "config");
   xmlDocSetRootElement(doc, config_node);
@@ -836,6 +834,5 @@ void monconf_save_config(monconf *conf, const char *file_path)
   FILE *f = fopen(file_path == NULL ? conf->file_path : file_path,"w+");
   xmlDocDump(f,doc);
   fclose(f);
-  xmlFreeDoc(doc);
-  xmlCleanupParser();  
+  xmlFreeDoc(doc);  
 }

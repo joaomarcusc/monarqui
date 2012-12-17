@@ -202,11 +202,13 @@ void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
 {
+  gtk_action_set_label(gui_data->action_startPause, "Stop");
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
 }
 
 void on_reactlist_stop(struct s_gui_data *gui_data) 
 {
+  gtk_action_set_label(gui_data->action_startPause, "Start");
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 
 
 }
@@ -441,7 +443,7 @@ void on_action_entryDelete_activate(GtkAction *action, gpointer user_data)
     monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
     
     GtkWidget *dialog;    
-    dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowEntry),
+    dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowMain),
 	      GTK_DIALOG_DESTROY_WITH_PARENT,
 	      GTK_MESSAGE_QUESTION,
 	      GTK_BUTTONS_YES_NO,
@@ -489,14 +491,15 @@ void on_action_saveConfig_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
   monconf_save_config(gui_data->conf, NULL);
-  /*GtkWidget *dialog;    
-  dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowEntry),
+  GtkWidget *dialog;    
+  dialog = gtk_message_dialog_new(GTK_WINDOW(gui_data->windowMain),
 	    GTK_DIALOG_DESTROY_WITH_PARENT,
 	    GTK_MESSAGE_INFO,
 	    GTK_BUTTONS_OK,
 	    "Config saved at '%s'",gui_data->conf->file_path);
   gtk_window_set_title(GTK_WINDOW(dialog), "Config Saved");
-  gtk_dialog_run(GTK_DIALOG(dialog));*/
+  gtk_dialog_run(GTK_DIALOG(dialog));  
+  gtk_widget_destroy(dialog);     
 }
 
 void on_windowMain_destroy (GtkObject *object, gpointer user_data)
@@ -555,9 +558,9 @@ int main (int argc, char *argv[])
   data.listStoreActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreActions"));  
   data.listStoreEntries = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntries"));
   data.listStoreEntryActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntryActions"));  
-  
+  gtk_action_set_label(data.action_startPause, "Start");
   gtk_builder_connect_signals (data.builder, (gpointer)&data);  
-  
+
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
   systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
   gtk_status_icon_set_visible(systray_icon, TRUE);

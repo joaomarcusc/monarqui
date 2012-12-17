@@ -10,6 +10,7 @@
     <signal name="activate" handler="on_action_mainExit_activate"/>
   </object>
   <object class="GtkAction" id="action_startPause">
+    <property name="always_show_image">True</property>
     <signal name="activate" handler="on_action_startPause_activate"/>
   </object>
   <object class="GtkImage" id="image_startStop">
@@ -141,8 +142,28 @@
                         <property name="visible">True</property>
                         <property name="related_action">action_mainExit</property>
                         <property name="use_action_appearance">True</property>
-                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitemservice">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_Service</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu1">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem1">
+                        <property name="visible">True</property>
+                        <property name="related_action">action_startPause</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                   </object>
@@ -158,6 +179,7 @@
         <child>
           <object class="GtkToolbar" id="toolbar">
             <property name="visible">True</property>
+            <property name="toolbar_style">both</property>
             <property name="icon_size">8</property>
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
@@ -202,7 +224,7 @@
               <object class="GtkToolButton" id="btnStart">
                 <property name="visible">True</property>
                 <property name="related_action">action_startPause</property>
-                <property name="label" translatable="yes">startStop</property>
+                <property name="label" translatable="yes">Start</property>
                 <property name="use_underline">True</property>
                 <property name="icon_widget">image_startStop</property>
               </object>
@@ -439,6 +461,7 @@
     <signal name="activate" handler="on_action_entryDelete_activate"/>
   </object>
   <object class="GtkAction" id="action_saveConfig">
+    <property name="label">Save</property>
     <property name="stock_id">gtk-save</property>
     <property name="icon_name">document-save</property>
     <property name="always_show_image">True</property>
