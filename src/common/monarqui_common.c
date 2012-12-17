@@ -72,18 +72,53 @@ char *int_events_to_str(int events)
   int idx_arr = 0;  
   int num_items = 0;
   int lenstr;
-  const int arr_events_size = 7;
+  const int arr_events_size = 7;	
   const char *arr_events[] = { STR_CREATE, STR_MODIFY, STR_DELETE, STR_ATTRIB, STR_MOVED_FROM, STR_MOVED_FROM, STR_ACCESS};
-  const int int_events[] = { MON_CREATE, MON_MODIFY, MON_DELETE, MON_ATTRIB, MON_MOVED_FROM, MON_MOVED_TO, MON_ACCESS};
+  int int_events[] = { MON_CREATE, MON_MODIFY, MON_DELETE, MON_ATTRIB, MON_MOVED_FROM, MON_MOVED_TO, MON_ACCESS};
   char *arr_matches[7];
-  for(idx_arr = 0 ; idx_arr < arr_events_size ; idx_arr++)
+  lenstr = 0;
+  if(events & MON_CREATE)
   {
-    if(events & int_events[idx_arr]) 
-    {
-      arr_matches[num_items++] = g_strdup(arr_events[idx_arr]);          
-      lenstr += strlen(arr_events[idx_arr]);
-    }
+    arr_matches[num_items] = g_strdup(STR_CREATE);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;
   }
+  if(events & MON_MODIFY)
+  {
+    arr_matches[num_items] = g_strdup(STR_MODIFY);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;
+  }
+  if(events & MON_DELETE)
+  {
+    arr_matches[num_items] = g_strdup(STR_DELETE);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;    
+  }
+  if(events & MON_ATTRIB)
+  {
+    arr_matches[num_items] = g_strdup(STR_ATTRIB);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;    
+  }
+  if(events & MON_MOVED_FROM)
+  {
+    arr_matches[num_items] = g_strdup(STR_MOVED_FROM);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;    
+  }
+  if(events & MON_MOVED_TO)
+  {
+    arr_matches[num_items] = g_strdup(STR_MOVED_TO);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;    
+  }
+  if(events & MON_ACCESS)
+  {
+    arr_matches[num_items] = g_strdup(STR_ACCESS);          
+    lenstr += strlen(arr_matches[num_items]);
+    num_items++;    
+  }      
   lenstr += num_items;
   char *retval = (char *)calloc(lenstr,sizeof(char));
   for(idx_arr = 0 ; idx_arr < num_items ; idx_arr++)

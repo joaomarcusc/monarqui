@@ -65,7 +65,7 @@ int main(int argc, char **argv)
   printf("Exiting...\n");  
   fflush(stdout);
   fflush(stderr);
-  
+  free(args.config_path);
   monconf_free_cli_args(&args);
   return EXIT_SUCCESS;
 }

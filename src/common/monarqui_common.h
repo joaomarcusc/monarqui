@@ -1,13 +1,13 @@
 #ifndef _MONARQUI_COMMON_H
 #define _MONARQUI_COMMON_H
 
-#define STR_ATTRIB "attrib"
+#define STR_CREATE "create"
 #define STR_MODIFY "modify"
 #define STR_DELETE "delete"
-#define STR_CREATE "create"
-#define STR_ACCESS "access"
+#define STR_ATTRIB "attrib"
 #define STR_MOVED_FROM "moved_from"
 #define STR_MOVED_TO "moved_to"
+#define STR_ACCESS "access"
 
 #define MON_CREATE 1
 #define MON_MODIFY 2
@@ -17,9 +17,9 @@
 #define MON_MOVED_FROM 32
 #define MON_MOVED_TO 64
 
-#define STR_ACT_SHELL "shell"
-#define STR_ACT_LUA "lua"
-#define STR_ACT_LOG "log"
+static const char STR_ACT_SHELL[] = "shell";
+static const char STR_ACT_LUA[] = "lua";
+static const char STR_ACT_LOG[] = "log";
 
 #define MON_ACT_SHELL 1
 #define MON_ACT_LUA 2

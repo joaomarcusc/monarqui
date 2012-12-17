@@ -110,7 +110,7 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 	  entry->recursive = (!strcmp(currNode->children->content,"true") ? 1 : 0);
 	else if(!strcmp(currNode->name,"events"))
 	  entry->events = str_events_to_int(currNode->children->content);
-	else if(!strcmp(currNode->name,"ignore_files")) {	  
+	else if(!strcmp(currNode->name,"ignores")) {	  
 	  monconf_entry_add_ignores_from_csv(entry, currNode->children->content);
 	}
 	else if(!strcmp(currNode->name,"actions")) 
@@ -134,9 +134,9 @@ void monconf_read_config(monconf *conf,const char *cfg_file)
 		      conf_action->action = monconf_new_action(conf, actionChildren->children->content);
 		    }
 		  }
-		  if(!strcmp(actionChildren->name,"events"))
+		  if(!strcmp(actionChildren->name,"events") && actionChildren->children != NULL && actionChildren->children->content != NULL)
 		    conf_action->events = str_events_to_int(actionChildren->children->content);
-		  else if(!strcmp(actionChildren->name,"filter_glob")) 
+		  else if(!strcmp(actionChildren->name,"globs")) 
 		  {
 		    if(actionChildren->children) 
 		    {
@@ -490,6 +490,7 @@ void monconf_prepare_config_directory()
     fprintf(fconfig,"</config>\n");
     fclose(fconfig);   
   }
+  g_free(config_file_path);
   g_free(config_dir);
 }
 
@@ -724,8 +725,8 @@ void monconf_load_actions_from_dir(monconf *conf, const char *path)
 	action->type = MON_ACT_LUA;
 	action->script = g_strdup(full_path);	
 	free(action_name);
-	g_free(full_path);
       }
+      g_free(full_path);
       
     }
 //    free(dir_entry);
@@ -763,7 +764,7 @@ void monconf_load_available_actions(monconf *conf)
   {    
     monconf_load_actions_from_dir(conf, temp_file_path);
   }
-  g_free(temp_file_path);     
+  g_free(temp_file_path);     \
   temp_file_path = NULL; 
   
   temp_file_path = g_strdup_printf("/opt/monarqui/actions", home);  
@@ -792,7 +793,7 @@ void monconf_save_config(monconf *conf, const char *file_path)
   GList *entry_item, *action_entry_item;
   int num_entries, i;   
   xmlDocPtr doc;
-  xmlNode *config_node, *entries_node, *entry_node;
+  xmlNode *config_node, *entries_node, *entry_node, *entry_actions_node, *entry_action_node;
   xmlXPathContextPtr xctx; 
   xmlXPathObjectPtr xobj;
   
@@ -806,12 +807,31 @@ void monconf_save_config(monconf *conf, const char *file_path)
   while(entry_item)
   {
     entry = (monconf_entry *)entry_item->data;
+    char *ignores = string_join(entry->ignore_files);
+    char *events = int_events_to_str(entry->events);    
     entry_node = xmlNewChild(entries_node, NULL, BAD_CAST "entry", NULL);
     xmlNewChild(entry_node, NULL, BAD_CAST "path", BAD_CAST (entry->file_name));
     xmlNewChild(entry_node, NULL, BAD_CAST "recursive", BAD_CAST (entry->recursive ? "true" : "false"));
-    xmlNewChild(entry_node, NULL, BAD_CAST "events", BAD_CAST (int_events_to_str(entry->events)));
-    xmlNewChild(entry_node, NULL, BAD_CAST "ignores", BAD_CAST (string_join(g_list_first(entry->ignore_files))));
+    xmlNewChild(entry_node, NULL, BAD_CAST "events", BAD_CAST events);
+    xmlNewChild(entry_node, NULL, BAD_CAST "ignores", BAD_CAST ignores);  
+    entry_actions_node = xmlNewChild(entry_node, NULL, BAD_CAST "actions", NULL);  
+    action_entry_item = g_list_first(entry->actions);
+    while(action_entry_item)
+    {      
+      conf_action = (monconf_action_entry *)action_entry_item->data;
+      char *action_events = int_events_to_str(conf_action->events);
+      char *globs = string_join(conf_action->globs);
+      entry_action_node = xmlNewChild(entry_actions_node, NULL, BAD_CAST "action", NULL);
+      xmlNewChild(entry_action_node, NULL, BAD_CAST "name", conf_action->action->name);
+      xmlNewChild(entry_action_node, NULL, BAD_CAST "events", action_events);
+      xmlNewChild(entry_action_node, NULL, BAD_CAST "globs", globs);      
+      free(action_events);
+      free(globs);
+      action_entry_item = action_entry_item->next;      
+    }
     entry_item = entry_item->next;
+    free(ignores);
+    free(events);
   }
   FILE *f = fopen(file_path == NULL ? conf->file_path : file_path,"w+");
   xmlDocDump(f,doc);

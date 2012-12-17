@@ -319,7 +319,7 @@ void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_ent
     gtk_list_store_set(gui_data->listStoreEntryActions,&iter,
            COL_ACTION_ENTRY_ENABLED, (gboolean)(conf_action_entry != NULL),       
 	   COL_ACTION_ENTRY_NAME, (gchar *)action_entry->name,		       
-           COL_ACTION_ENTRY_GLOBS, (conf_action_entry != NULL ? string_join(conf_action_entry->globs) : ""),           
+           COL_ACTION_ENTRY_GLOBS, (conf_action_entry != NULL ? str_globs : ""),           
            COL_ACTION_ENTRY_CREATE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_CREATE) : (gboolean)0),
            COL_ACTION_ENTRY_MODIFY, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_MODIFY) : (gboolean)0),
            COL_ACTION_ENTRY_DELETE, (conf_action_entry != NULL ? (gboolean)(conf_action_entry->events & MON_DELETE) : (gboolean)0),
@@ -565,7 +565,8 @@ int main (int argc, char *argv[])
   populate_actions(&data);
   gtk_widget_show (data.windowMain);                
   gtk_main ();
-  g_object_unref (G_OBJECT (data.builder));    
+  g_object_unref (G_OBJECT (data.builder));
+  free(args.config_path);
   return 0;
 }
 
@@ -579,6 +580,7 @@ void populate_entries(struct s_gui_data *gui_data)
   while(item)
   {
     monconf_entry *entry = (monconf_entry *)item->data;
+    char *str_ignores = string_join(entry->ignore_files);
     gtk_list_store_append(gui_data->listStoreEntries, &iter);
     gtk_list_store_set(gui_data->listStoreEntries,&iter,
            COL_ENTRY_PATH, entry->file_name,
@@ -589,10 +591,10 @@ void populate_entries(struct s_gui_data *gui_data)
            COL_ENTRY_EVENT_ATTRIBS, (gboolean)(entry->events & MON_ATTRIB),
            COL_ENTRY_EVENT_MOVED_FROM, (gboolean)(entry->events & MON_MOVED_FROM),
            COL_ENTRY_EVENT_MOVED_TO, (gboolean)(entry->events & MON_MOVED_TO),
-           COL_ENTRY_IGNORE, string_join(entry->ignore_files),           
+           COL_ENTRY_IGNORE, str_ignores,           
            -1
           );
-  
+    free(str_ignores);
     item = item->next;
   }
 }
