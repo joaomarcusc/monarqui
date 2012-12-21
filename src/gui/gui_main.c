@@ -48,8 +48,12 @@ struct s_gui_data
   GtkAction *action_actionModify;  
   GtkAction *action_actionDelete;  
   GtkAction *action_saveConfig;  
+  GtkAction* action_toggleApplication;
+  GtkAction* action_systrayPopup;
   
   GtkImage *image_startStop;
+  
+  GtkStatusIcon *systrayIcon;
   
   GtkListStore *listStoreActions;
   GtkListStore *listStoreEntries;
@@ -101,6 +105,25 @@ enum
 void populate_entries(struct s_gui_data *gui_data);
 void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_entry);
 void populate_actions(struct s_gui_data *gui_data);
+
+void on_action_toggleApplication_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  if(gtk_widget_get_visible(gui_data->windowMain))
+  {
+    gtk_widget_hide(gui_data->windowMain);
+    gtk_widget_hide(gui_data->windowEntry);
+  }
+  else
+  {
+    gtk_widget_show(gui_data->windowMain);
+  }
+}
+
+void on_action_systrayPopup_activate(GtkAction *action, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+}
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
 {
@@ -512,6 +535,18 @@ void on_btnStartPause_clicked(GtkObject *object, gpointer user_data)
 {
 }
 
+void on_systrayIcon_activate(GtkObject *object, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_action_activate(gui_data->action_toggleApplication);
+}
+
+void on_systrayIcon_popup_menu(GtkObject *object, gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  gtk_action_activate(gui_data->action_systrayPopup);
+}
+
 int main (int argc, char *argv[])
 {  
   struct s_gui_data data;  
@@ -549,7 +584,10 @@ int main (int argc, char *argv[])
   data.action_actionModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionModify"));
   data.action_actionDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionDelete"));
   data.action_saveConfig = GTK_ACTION(gtk_builder_get_object(data.builder, "action_saveConfig"));  
-  data.image_startStop = (GtkImage *)GTK_WIDGET(gtk_builder_get_object(data.builder,"image_startStop"));  
+  data.action_toggleApplication = GTK_ACTION(gtk_builder_get_object(data.builder, "action_toggleApplication"));
+  data.action_systrayPopup = GTK_ACTION(gtk_builder_get_object(data.builder, "action_systrayPopup"));
+  data.image_startStop = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_startStop"));  
+  data.systrayIcon = GTK_STATUS_ICON(gtk_builder_get_object(data.builder,"systrayIcon"));  
   data.args = &args;
   data.conf = conf;
   data.treeviewActions = GTK_TREE_VIEW(gtk_builder_get_object(data.builder,"treeviewActions"));
@@ -562,8 +600,6 @@ int main (int argc, char *argv[])
   gtk_builder_connect_signals (data.builder, (gpointer)&data);  
 
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
-  systray_icon = gtk_status_icon_new_from_icon_name(ICON_SYSTRAY);  
-  gtk_status_icon_set_visible(systray_icon, TRUE);
   populate_entries(&data);  
   populate_actions(&data);
   gtk_widget_show (data.windowMain);                
@@ -615,13 +651,13 @@ void populate_actions(struct s_gui_data *gui_data)
     switch(action_entry->type)
     {
       case MON_ACT_SHELL:
-	type_str = STR_ACT_SHELL;
+	type_str = g_strdup(STR_ACT_SHELL);
 	break;
       case MON_ACT_LOG:
-	type_str = STR_ACT_LOG;
+	type_str = g_strdup(STR_ACT_LOG);
 	break;
       default:
-	type_str = STR_ACT_LUA;
+	type_str = g_strdup(STR_ACT_LUA);
 	break;
     }
     action_entry = (monaction_entry *)item->data;
@@ -631,7 +667,7 @@ void populate_actions(struct s_gui_data *gui_data)
 		       COL_ACTION_TYPE, type_str,
 		       COL_ACTION_SCRIPT, action_entry->script,
 		       -1);
-		       
+    g_free(type_str);
     item = item->next;
   }
   g_list_free(action_list);

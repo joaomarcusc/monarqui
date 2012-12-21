@@ -120,7 +120,7 @@
     </data>
   </object>
   <object class="GtkWindow" id="windowMain">
-    <property name="title" translatable="yes">Monarqui 0.1.3 - Main</property>
+    <property name="title" translatable="yes">Monarqui 0.3 - Main</property>
     <property name="window_position">center</property>
     <signal name="destroy" handler="on_windowMain_destroy"/>
     <child>
@@ -142,6 +142,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">action_mainExit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -162,6 +163,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">action_startPause</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -852,13 +854,15 @@
     <property name="visible">True</property>
     <property name="icon_name">list-remove</property>
   </object>
-  <object class="GtkImage" id="image_startStop1">
+  <object class="GtkImage" id="image_systray">
     <property name="visible">True</property>
     <property name="icon_name">gtk-media-play-ltr</property>
   </object>
   <object class="GtkAction" id="action_entrySave">
     <property name="label">Save</property>
-    <property name="icon_name">security-high</property>
+    <property name="stock_id">gtk-zoom-100</property>
+    <property name="icon_name">dialog-ok</property>
+    <property name="always_show_image">True</property>
     <signal name="activate" handler="on_action_entrySave_activate"/>
   </object>
   <object class="GtkAction" id="action_entryClose">
@@ -991,7 +995,6 @@
             <child>
               <object class="GtkFileChooserButton" id="filechooserActionPath">
                 <property name="visible">True</property>
-                <property name="filter">filefilterActions</property>
                 <property name="title" translatable="yes">Select a script</property>
               </object>
               <packing>
@@ -1045,5 +1048,16 @@
       </object>
     </child>
   </object>
-  <object class="GtkFileFilter" id="filefilterActions"/>
+  <object class="GtkStatusIcon" id="systrayIcon">
+    <property name="pixbuf">images/crown_icon.png</property>
+    <property name="title">Monarqui Filesystem Change Monitor</property>
+    <signal name="activate" handler="on_systrayIcon_activate"/>
+    <signal name="popup_menu" handler="on_systrayIcon_popup_menu"/>
+  </object>
+  <object class="GtkAction" id="action_toggleApplication">
+    <signal name="activate" handler="on_action_toggleApplication_activate"/>
+  </object>
+  <object class="GtkAction" id="action_systrayPopup">
+    <signal name="activate" handler="on_action_systrayPopup_activate"/>
+  </object>
 </interface>

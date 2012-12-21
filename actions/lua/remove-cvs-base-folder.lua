@@ -42,22 +42,17 @@ end
 
 function conf_action_preload(dir) 
   for filename, attr in walk_tree(dir) do      
-    if attr.mode == "directory" and string.sub(filename,-8) == "CVS/Base" and posix.stat(filename) ~= nil then
+    if attr ~= nil and attr.mode == "directory" and (string.sub(filename,-8) == "CVS/Base" or string.sub(filename,-17) == "CVS/BaseRevisions") and posix.stat(filename) ~= nil then
       deltree(filename)
     end
   end  
   return true
 end
-
 function event_action(event, base_path, file_path, timestamp) 
   local full_path = base_path.."/"..file_path
-  f = io.open("/tmp/base","w+")
-  io.output(f)
-  io.write(full_path.."\n")
-  io.close(f)
   if posix.stat(full_path) ~= nil then
     local attr = lfs.attributes(full_path)
-    if attr.mode == "directory" and string.sub(full_path,-8) == "CVS/Base" then
+    if attr ~= nil and full_path ~= nil and attr.mode == "directory" and (string.sub(full_path,-8) == "CVS/Base" or string.sub(filename,-17) == "CVS/BaseRevisions") then
       deltree(full_path)
     end
   end
