@@ -142,8 +142,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
-                        <property name="related_action">action_mainExit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">action_mainExit</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -163,8 +163,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem1">
                         <property name="visible">True</property>
-                        <property name="related_action">action_startPause</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">action_startPause</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
@@ -188,8 +188,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainAdd</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_mainAdd</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -201,8 +201,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainModify</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_mainModify</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
@@ -214,8 +214,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryDelete">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainDelete</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_mainDelete</property>
                 <property name="label" translatable="yes">Modify</property>
                 <property name="use_underline">True</property>
               </object>
@@ -240,8 +240,8 @@
             <child>
               <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="related_action">action_saveConfig</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_saveConfig</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -387,6 +387,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">listStoreActions</property>
+                <property name="headers_clickable">False</property>
+                <property name="search_column">0</property>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn15">
                     <property name="title">Name</property>
@@ -426,12 +428,32 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label3">
+              <object class="GtkLabel" id="label7">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Actions</property>
               </object>
               <packing>
-                <property name="position">1</property>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkTextView" id="textviewLog">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="buffer">textbufferLog</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Log</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -812,8 +834,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_entrySave</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entrySave</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -826,8 +848,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_entryClose</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_entryClose</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1017,8 +1039,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_actionSave</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_actionSave</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1031,8 +1053,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">action_actionClose</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">action_actionClose</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1070,4 +1092,5 @@
     <property name="visible">True</property>
     <property name="pixbuf">images/crown_icon_gray.png</property>
   </object>
+  <object class="GtkTextBuffer" id="textbufferLog"/>
 </interface>

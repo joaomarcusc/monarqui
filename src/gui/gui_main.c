@@ -74,6 +74,8 @@ struct s_gui_data
   
   GtkImage *image_started;
   GtkImage *image_stopped;
+  
+  void *zmq_context;
 };
 
 enum

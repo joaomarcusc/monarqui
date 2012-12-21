@@ -14,6 +14,7 @@ void *run_reactor(void *startarg)
   lua_State *L;
   monaction_entry *action_entry;
   void *sub_socket;
+  void *pub_log_socket;
   zmq_msg_t message;  
   int msgsize;
   int recvreply;  
@@ -21,7 +22,8 @@ void *run_reactor(void *startarg)
   monevent evt;
   start = (reactstart *)startarg;
   printf("Waiting for events to react...\n");
-    
+  pub_log_socket = zmq_socket(start->zmq_context, ZMQ_PUB);
+  zmq_bind(pub_log_socket, "inproc://event_log");
   sub_socket = zmq_socket(start->zmq_context, ZMQ_SUB);    
   if(zmq_connect(sub_socket, "inproc://file_events") || zmq_setsockopt (sub_socket, ZMQ_SUBSCRIBE, NULL, 0))
   {
@@ -70,6 +72,7 @@ void *run_reactor(void *startarg)
     }    
   }
   zmq_close(sub_socket);
+  zmq_close(pub_log_socket);
   printf("Closing reactor...\n");
   start->active = 0;
   start->socket_connected = 0;
