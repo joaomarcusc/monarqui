@@ -65,8 +65,15 @@ struct s_gui_data
   
   GtkBuilder *builder;
   
+  GtkMenu *systrayMenu;
+  GtkMenuItem *systrayMenuItem_startStop;
+  GtkMenuItem *systrayMenuItem_quit;
+  
   monconf_entry *curr_entry;
   monaction_entry *curr_action;
+  
+  GtkImage *image_started;
+  GtkImage *image_stopped;
 };
 
 enum
@@ -122,7 +129,7 @@ void on_action_toggleApplication_activate(GtkAction *action, gpointer user_data)
 
 void on_action_systrayPopup_activate(GtkAction *action, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;    
 }
 
 void on_action_mainExit_activate(GtkAction *action, gpointer user_data)
@@ -225,15 +232,27 @@ void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
 {
-  gtk_action_set_label(gui_data->action_startPause, "Stop");
+  gtk_action_set_label(gui_data->action_startPause, "Stop");    
+  gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_started));
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
 }
 
 void on_reactlist_stop(struct s_gui_data *gui_data) 
 {
   gtk_action_set_label(gui_data->action_startPause, "Start");
+  gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_stopped));
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 
 
+}
+
+void on_windowMain_window_state_event(GtkWidget *widget, GdkEventWindowState *event, gpointer *user_data) 
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
+/*  if(event->new_window_state == GDK_WINDOW_STATE_ICONIFIED)
+    gtk_widget_hide(gui_data->windowMain);  
+  else
+    gtk_widget_show_all(gui_data->windowMain);  
+  */
 }
 
 void on_action_startPause_activate(GtkAction *action, gpointer user_data)
@@ -541,10 +560,9 @@ void on_systrayIcon_activate(GtkObject *object, gpointer user_data)
   gtk_action_activate(gui_data->action_toggleApplication);
 }
 
-void on_systrayIcon_popup_menu(GtkObject *object, gpointer user_data)
+void on_systrayIcon_popup_menu(GtkStatusIcon *statusIcon, guint button, guint activate_time, gpointer user_data)
 {
-  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
-  gtk_action_activate(gui_data->action_systrayPopup);
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;     
 }
 
 int main (int argc, char *argv[])
@@ -563,8 +581,6 @@ int main (int argc, char *argv[])
   data.rstart.active = 0;
   data.lstart.active = 0;
   
-  
-  GtkStatusIcon *systray_icon;
   gtk_init (&argc, &argv);
   
   data.builder = gtk_builder_new ();
@@ -599,10 +615,22 @@ int main (int argc, char *argv[])
   data.listStoreActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreActions"));  
   data.listStoreEntries = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntries"));
   data.listStoreEntryActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntryActions"));  
+  
+  data.image_started = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_started"));
+  data.image_stopped = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_stopped"));
+  
+  data.systrayMenu = GTK_MENU(gtk_menu_new());
+  data.systrayMenuItem_startStop = GTK_MENU_ITEM(gtk_menu_item_new_with_label("Start"));
+  data.systrayMenuItem_quit = GTK_MENU_ITEM(gtk_menu_item_new_with_label("Quit"));  
+  
+  gtk_menu_shell_append(GTK_MENU_SHELL(data.systrayMenu), GTK_WIDGET(data.systrayMenuItem_startStop));
+  gtk_menu_shell_append(GTK_MENU_SHELL(data.systrayMenu), GTK_WIDGET(data.systrayMenuItem_quit));
+    
   gtk_action_set_label(data.action_startPause, "Start");
-  gtk_builder_connect_signals (data.builder, (gpointer)&data);  
-
+  gtk_builder_connect_signals (data.builder, (gpointer)&data);    
+     
   gtk_image_set_from_icon_name(data.image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON);          
+  gtk_status_icon_set_from_pixbuf(data.systrayIcon, gtk_image_get_pixbuf(data.image_stopped));
   populate_entries(&data);  
   populate_actions(&data);
   gtk_widget_show (data.windowMain);                

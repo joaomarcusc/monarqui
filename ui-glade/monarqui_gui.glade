@@ -122,7 +122,9 @@
   <object class="GtkWindow" id="windowMain">
     <property name="title" translatable="yes">Monarqui 0.3 - Main</property>
     <property name="window_position">center</property>
+    <property name="icon">images/crown_icon.png</property>
     <signal name="destroy" handler="on_windowMain_destroy"/>
+    <signal name="window_state_event" handler="on_windowMain_window_state_event"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -1059,5 +1061,13 @@
   </object>
   <object class="GtkAction" id="action_systrayPopup">
     <signal name="activate" handler="on_action_systrayPopup_activate"/>
+  </object>
+  <object class="GtkImage" id="image_started">
+    <property name="visible">True</property>
+    <property name="pixbuf">images/crown_icon.png</property>
+  </object>
+  <object class="GtkImage" id="image_stopped">
+    <property name="visible">True</property>
+    <property name="pixbuf">images/crown_icon_gray.png</property>
   </object>
 </interface>
