@@ -548,7 +548,9 @@ void on_systrayIcon_popup_menu(GtkObject *object, gpointer user_data)
 }
 
 int main (int argc, char *argv[])
-{  
+{ 
+  char *cwd;
+  char *glade_path;
   struct s_gui_data data;  
   config_args args;
   args.config_path = NULL;
@@ -566,8 +568,9 @@ int main (int argc, char *argv[])
   gtk_init (&argc, &argv);
   
   data.builder = gtk_builder_new ();
-  gtk_builder_add_from_file (data.builder, "ui-glade/monarqui_gui.glade", NULL);  
-  
+  glade_path = monconf_resolve_path("ui-glade/monarqui_gui.glade");
+  gtk_builder_add_from_file (data.builder, glade_path, NULL);  
+  g_free(glade_path);
   data.builder = GTK_BUILDER(data.builder);
   data.windowMain = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowMain"));
   data.windowEntry = GTK_WIDGET(gtk_builder_get_object (data.builder, "windowEntry"));
