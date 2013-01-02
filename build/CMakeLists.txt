@@ -58,9 +58,9 @@ file(GLOB monarqui_gui_HEADERS ${monarqui_common_HEADERS} ${monarqui_reactlist_H
 
 set(CMAKE_C_FLAGS "-ffunction-sections -fdata-sections")
 
-add_executable (../out/monarqui_cli ${monarqui_cli_SOURCES} ${monarqui_cli_HEADERS})
-target_link_libraries(../out/monarqui_cli ${monarqui_cli_LIBRARIES})
+add_executable (../bin/monarqui_cli ${monarqui_cli_SOURCES} ${monarqui_cli_HEADERS})
+target_link_libraries(../bin/monarqui_cli ${monarqui_cli_LIBRARIES})
 
-add_executable (../out/monarqui_gui ${monarqui_gui_SOURCES} ${monarqui_gui_HEADERS})
-target_link_libraries(../out/monarqui_gui ${monarqui_gui_LIBRARIES})
+add_executable (../bin/monarqui_gui ${monarqui_gui_SOURCES} ${monarqui_gui_HEADERS})
+target_link_libraries(../bin/monarqui_gui ${monarqui_gui_LIBRARIES})
 # add_custom_command(TARGET reversi PRE_BUILD COMMAND ./bn.sh)

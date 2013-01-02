@@ -120,7 +120,7 @@
     </data>
   </object>
   <object class="GtkWindow" id="windowMain">
-    <property name="title" translatable="yes">Monarqui 0.3 - Main</property>
+    <property name="title" translatable="yes">Monarqui 0.4 - Main</property>
     <property name="window_position">center</property>
     <property name="icon">images/crown_icon.png</property>
     <signal name="destroy" handler="on_windowMain_destroy"/>
@@ -142,8 +142,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="menuItemExit">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">action_mainExit</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -163,8 +163,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem1">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">action_startPause</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
@@ -188,8 +188,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryAdd">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_mainAdd</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -201,8 +201,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_mainModify</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
@@ -214,8 +214,8 @@
             <child>
               <object class="GtkToolButton" id="btnEntryDelete">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_mainDelete</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Modify</property>
                 <property name="use_underline">True</property>
               </object>
@@ -240,8 +240,8 @@
             <child>
               <object class="GtkToolButton" id="btnSaveConfig">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_saveConfig</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">startStop</property>
                 <property name="use_underline">True</property>
               </object>
@@ -438,10 +438,18 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTextView" id="textviewLog">
+              <object class="GtkScrolledWindow" id="scrolledwindow1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="buffer">textbufferLog</property>
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="vscrollbar_policy">automatic</property>
+                <child>
+                  <object class="GtkTextView" id="textviewLog">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="buffer">textbufferLog</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -834,8 +842,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entrySave</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -848,8 +856,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_entryClose</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1039,8 +1047,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_actionSave</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1053,8 +1061,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">action_actionClose</property>
+                <property name="use_action_appearance">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1093,4 +1101,8 @@
     <property name="pixbuf">images/crown_icon_gray.png</property>
   </object>
   <object class="GtkTextBuffer" id="textbufferLog"/>
+  <object class="GtkImage" id="image_started_event">
+    <property name="visible">True</property>
+    <property name="pixbuf">images/crown_icon_event.png</property>
+  </object>
 </interface>

@@ -73,9 +73,15 @@ struct s_gui_data
   monaction_entry *curr_action;
   
   GtkImage *image_started;
+  GtkImage *image_started_event;
   GtkImage *image_stopped;
   
-  void *zmq_context;
+  void *sub_event_log;
+  
+  GtkTextBuffer *textbufferLog;  
+  
+  gboolean logged_event;
+  guint log_timer_id;
 };
 
 enum
@@ -226,6 +232,70 @@ void on_action_entrySave_activate(GtkAction *action, gpointer user_data)
   populate_entries(gui_data);  
 }
 
+gboolean check_event_log(gpointer user_data)
+{
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;    
+  zmq_msg_t message;
+  int msgsize;
+  char *strmsg;
+  char has_msg ;
+  zmq_msg_init(&message);
+  has_msg = !zmq_recv(gui_data->sub_event_log, &message, ZMQ_NOBLOCK);  
+  gboolean found_msg = FALSE;
+  while(has_msg) 
+  {   
+    found_msg = TRUE;
+    msgsize = zmq_msg_size(&message);                      
+    strmsg = (char *)malloc(msgsize);
+    memcpy(strmsg, zmq_msg_data(&message), msgsize);
+    GtkTextIter logIter;
+    GtkTextMark *logMark = gtk_text_buffer_get_insert (gui_data->textbufferLog);
+    gtk_text_buffer_get_iter_at_mark (gui_data->textbufferLog, &logIter, logMark);
+    
+    if (gtk_text_buffer_get_char_count(gui_data->textbufferLog))
+	gtk_text_buffer_insert (gui_data->textbufferLog, &logIter, "\n", 1);
+
+    gtk_text_buffer_insert (gui_data->textbufferLog, &logIter, strmsg, msgsize);      
+    zmq_msg_close(&message);
+    zmq_msg_init(&message);
+    has_msg = !zmq_recv(gui_data->sub_event_log, &message, ZMQ_NOBLOCK);    
+  }
+  if(found_msg != gui_data->logged_event) 
+  {
+    gui_data->logged_event = found_msg;
+    if(found_msg)
+    {
+      gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_started_event));    
+    }
+    else
+    {
+      gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_started));    
+    }
+  }
+  if(gui_data->lstart.active)
+    return TRUE;
+  return FALSE;
+}
+
+void start_reading_event_log(struct s_gui_data *gui_data)
+{
+  gui_data->zmq_context = gui_data->lstart.zmq_context;
+  gui_data->sub_event_log = zmq_socket(gui_data->zmq_context, ZMQ_SUB);    
+  if(zmq_connect(gui_data->sub_event_log, "inproc://event_log") || zmq_setsockopt (gui_data->sub_event_log, ZMQ_SUBSCRIBE, "", 0))
+  {
+    fprintf(stderr, "Error %d opening the event log queue\n", errno);
+    exit(-2);
+    return;
+  }
+  g_timeout_add(500, check_event_log, (gpointer)gui_data);
+}
+
+void stop_reading_event_log(struct s_gui_data *gui_data)
+{
+  zmq_close(gui_data->sub_event_log);  
+  gui_data->logged_event = FALSE;  
+}
+
 void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
 {
   struct s_gui_data *gui_data = (struct s_gui_data *)user_data;  
@@ -233,18 +303,20 @@ void on_action_entryClose_activate(GtkAction *action, gpointer user_data)
 }
 
 void on_reactlist_start(struct s_gui_data *gui_data) 
-{
+{  
   gtk_action_set_label(gui_data->action_startPause, "Stop");    
   gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_started));
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_STOP, GTK_ICON_SIZE_BUTTON); 
+  start_reading_event_log(gui_data);
 }
 
 void on_reactlist_stop(struct s_gui_data *gui_data) 
 {
+  gui_data->logged_event = FALSE;
   gtk_action_set_label(gui_data->action_startPause, "Start");
   gtk_status_icon_set_from_pixbuf(gui_data->systrayIcon, gtk_image_get_pixbuf(gui_data->image_stopped));
   gtk_image_set_from_icon_name(gui_data->image_startStop, ICON_NAME_START, GTK_ICON_SIZE_BUTTON); 
-
+  stop_reading_event_log(gui_data);
 }
 
 void on_windowMain_window_state_event(GtkWidget *widget, GdkEventWindowState *event, gpointer *user_data) 
@@ -619,11 +691,15 @@ int main (int argc, char *argv[])
   data.listStoreEntryActions = GTK_LIST_STORE(gtk_builder_get_object(data.builder,"listStoreEntryActions"));  
   
   data.image_started = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_started"));
+  data.image_started_event = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_started_event"));
   data.image_stopped = GTK_IMAGE(gtk_builder_get_object(data.builder,"image_stopped"));
+  data.logged_event = FALSE;
+  data.textbufferLog = GTK_TEXT_BUFFER(gtk_builder_get_object(data.builder, "textbufferLog"));
   
   data.systrayMenu = GTK_MENU(gtk_menu_new());
   data.systrayMenuItem_startStop = GTK_MENU_ITEM(gtk_menu_item_new_with_label("Start"));
   data.systrayMenuItem_quit = GTK_MENU_ITEM(gtk_menu_item_new_with_label("Quit"));  
+  
   
   gtk_menu_shell_append(GTK_MENU_SHELL(data.systrayMenu), GTK_WIDGET(data.systrayMenuItem_startStop));
   gtk_menu_shell_append(GTK_MENU_SHELL(data.systrayMenu), GTK_WIDGET(data.systrayMenuItem_quit));

@@ -41,6 +41,7 @@ void *run_listener(void *startarg)
     start->active = 0;
     fprintf(stderr,"Error opening the inotify listener: %d\n",zmq_errno());
     pthread_exit(NULL);
+    exit(-2);
     return;
   }    
   start->socket_bound = 1;
