@@ -120,9 +120,10 @@
     </data>
   </object>
   <object class="GtkWindow" id="windowMain">
-    <property name="title" translatable="yes">Monarqui 0.4 - Main</property>
-    <property name="window_position">center</property>
+    <property name="title" translatable="yes">Monarqui 0.5 - Main</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">images/crown_icon.png</property>
+    <property name="type_hint">dialog</property>
     <signal name="destroy" handler="on_windowMain_destroy"/>
     <signal name="window_state_event" handler="on_windowMain_window_state_event"/>
     <child>
@@ -199,9 +200,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnEntryModify">
+              <object class="GtkToolButton" id="btnEntryDuplicate">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainModify</property>
+                <property name="related_action">action_entryDuplicate</property>
                 <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
@@ -212,11 +213,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnEntryDelete">
+              <object class="GtkToolButton" id="btnEntryModify">
                 <property name="visible">True</property>
-                <property name="related_action">action_mainDelete</property>
+                <property name="related_action">action_mainModify</property>
                 <property name="use_action_appearance">True</property>
-                <property name="label" translatable="yes">Modify</property>
+                <property name="label" translatable="yes">Add</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -231,6 +232,19 @@
                 <property name="label" translatable="yes">Start</property>
                 <property name="use_underline">True</property>
                 <property name="icon_widget">image_startStop</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnEntryDelete">
+                <property name="visible">True</property>
+                <property name="related_action">action_mainDelete</property>
+                <property name="use_action_appearance">True</property>
+                <property name="label" translatable="yes">Modify</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1104,5 +1118,13 @@
   <object class="GtkImage" id="image_started_event">
     <property name="visible">True</property>
     <property name="pixbuf">images/crown_icon_event.png</property>
+  </object>
+  <object class="GtkAction" id="action_entryDuplicate">
+    <property name="label">Duplicate</property>
+    <property name="short_label">Duplicate</property>
+    <property name="stock_id">gtk-copy</property>
+    <property name="icon_name">edit-copy</property>
+    <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_action_entryDuplicate_activate"/>
   </object>
 </interface>

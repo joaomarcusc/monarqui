@@ -41,6 +41,36 @@ monconf_entry *monconf_new_entry(monconf *conf)
   return entry;
 }
   
+monconf_entry *monconf_entry_duplicate(monconf *conf, monconf_entry *entry)
+{
+  GList *item;
+  monconf_entry *dupl = monconf_new_entry(conf);
+  dupl->file_name = g_strdup(entry->file_name);
+  dupl->events = entry->events;
+  dupl->recursive = entry->recursive;  
+  char *csv = string_join(entry->ignore_files);
+  monconf_entry_add_ignores_from_csv(dupl, csv);
+  free(csv);
+  item = g_list_first(entry->actions);
+  while(item)
+  {
+    monconf_action_entry *dupl_action;
+    monconf_action_entry *entry_action = (monconf_action_entry *)item->data;
+    dupl_action = monconf_entry_new_action(dupl);
+    dupl_action->action = entry_action->action;
+    dupl_action->events = entry_action->events;
+    dupl_action->num_globs = entry_action->num_globs;
+    if(entry_action->filter_glob)
+      dupl_action->filter_glob = strdup(entry_action->filter_glob);
+    csv = string_join(entry_action->globs);
+    monconf_action_entry_add_globs_from_csv(dupl_action,csv);
+    free(csv);
+    item = item->next;
+  }
+ 
+  return dupl;
+}
+
 monconf_action_entry *monconf_entry_new_action(monconf_entry *conf_entry)
 {
   monconf_action_entry *action_entry;

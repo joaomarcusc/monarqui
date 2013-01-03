@@ -36,3 +36,5 @@ Monarqui.*
 *.out
 *.app
 
+build/out
+build/bin

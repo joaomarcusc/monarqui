@@ -453,6 +453,25 @@ void populate_entry_actions(struct s_gui_data *gui_data, monconf_entry *conf_ent
   g_list_free(action_keys);
 }
 
+void on_action_entryDuplicate_activate(GtkAction *action, gpointer user_data)
+{
+  GtkTreeSelection *selection;
+  GtkTreeModel     *model;
+  GtkTreeIter       iter;  
+  monconf_entry    *dupl_entry;
+  struct s_gui_data *gui_data = (struct s_gui_data *)user_data;
+  
+  selection = gtk_tree_view_get_selection(gui_data->treeviewEntries);
+  if (gtk_tree_selection_get_selected(selection, &model, &iter))
+  {
+    gchar *path;    
+    gtk_tree_model_get (model, &iter, COL_ENTRY_PATH, &path, -1);
+    monconf_entry *entry = monconf_entry_get_by_path(gui_data->conf, path);
+    dupl_entry = monconf_entry_duplicate(gui_data->conf, entry);    
+    populate_entries(gui_data);
+  }
+}
+
 void show_config_window(struct s_gui_data *gui_data, int action_type)
 {
   GtkTreeSelection *selection;

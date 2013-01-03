@@ -58,6 +58,7 @@ int monconf_num_entries(monconf *conf);
 monconf_entry *monconf_entry_get_by_path(monconf *conf, char *path);
 monconf_action_entry *monconf_entry_new_action(monconf_entry *conf_entry);
 monconf_entry *monconf_new_entry(monconf *conf);
+monconf_entry *monconf_entry_duplicate(monconf *conf, monconf_entry *entry);
 monconf_entry *monconf_nth_entry(monconf *conf, int n);
 monaction_entry *monconf_new_action(monconf *conf, const char *str_name);
 void add_str_to_g_list(GList *list, const char *data);
