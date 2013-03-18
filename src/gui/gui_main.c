@@ -42,7 +42,8 @@ struct s_gui_data
   GtkAction *action_configClose;
   GtkAction *action_startPause;  
   GtkAction *action_entryAdd;  
-  GtkAction *action_entryModify;  
+  GtkAction *action_entryModify;
+  GtkAction *action_entryDuplicate;  
   GtkAction *action_entryDelete;  
   GtkAction *action_actionAdd;  
   GtkAction *action_actionModify;  
@@ -691,6 +692,7 @@ int main (int argc, char *argv[])
   data.action_startPause = GTK_ACTION(gtk_builder_get_object(data.builder, "action_startPause"));
   data.action_entryAdd = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryAdd"));
   data.action_entryModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryModify"));
+  data.action_entryDuplicate = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryDuplicate"));
   data.action_entryDelete = GTK_ACTION(gtk_builder_get_object(data.builder, "action_entryDelete"));
   data.action_actionAdd = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionAdd"));
   data.action_actionModify = GTK_ACTION(gtk_builder_get_object(data.builder, "action_actionModify"));
