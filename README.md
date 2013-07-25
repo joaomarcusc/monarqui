@@ -17,6 +17,4 @@ Enter the source directory and run build.sh:
 
     # sh build.sh
 
-It will (hopefully) generate two binaries: out/monarqui`_cli and out/monarqui`_gui. For now, the monarqui`_gui is non-functional, only the CLI version works.
-
-The project is still at its infancy, Further instructions and build commands are still to be done.
+It will (hopefully) generate two binaries: out/monarqui`_cli and out/monarqui`_gui. 
